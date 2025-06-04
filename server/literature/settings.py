@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'social_django',
     'corsheaders',
+    "channels",
     'users',
+    'games',
 ]
 
 MIDDLEWARE = [
@@ -81,7 +83,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'literature.wsgi.application'
+ASGI_APPLICATION = "literature.asgi.application"
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
