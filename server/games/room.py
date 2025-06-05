@@ -24,15 +24,12 @@ class Room:
         self.host_id = host_id
         self.players = {}  # player_id -> Player object
         self.game = Game(self.room_id)
-        
-        host_player = Player(host_id, host_id, team=1)  # Host starts on team 1
-        self.add_player(host_player)
     
     def _generate_room_id(self, length=6):
         """Generate a random room ID."""
         return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
     
-    def add_player(self, player):
+    def add_player(self, player_id, player_name):
         """
         Add a player to the room.
         
@@ -44,19 +41,18 @@ class Room:
             
         Returns:
             Player: The added player
-        """
-        if self.game.state != NOT_STARTED:
-            raise ValueError("Cannot join this room")
-            
+        """ 
         if len(self.players) >= 6:
             raise ValueError("Room is full")
             
-        if player.id in self.players:
+        if player_id in self.players:
             raise ValueError("Player already in room")
         
-        self.players[player.id] = player
-            
-        return player
+        if not player_name:
+            raise ValueError("Player name cannot be empty")
+
+        player = Player(player_id, player_name, team=1 if len(self.players) % 2 == 0 else 2)
+        self.players[player_id] = player
     
     def remove_player(self, remove_requester_id, player_id):
         """
@@ -137,11 +133,18 @@ class Room:
         Register an action from a player.
         """
         actor_id = action.get('actor_id')
-        if actor_id not in self.players:
-            raise ValueError("Player not found in room")
+        if not actor_id:
+            raise ValueError("Actor ID is required for action")
         action_type = action.get('type')
+        if actor_id not in self.players and action_type != 'add_player':
+            raise ValueError("Player not found in room")
         if action_type == 'start_game':
             self.start_game(actor_id)
+        elif action_type == 'add_player':
+            actor_name = action.get('actor_name')
+            if not actor_name:
+                raise ValueError("Actor name is required to add a player")
+            self.add_player(actor_id, actor_name)
         elif action_type == 'change_team':
             player_id = action.get('player_id')
             new_team = action.get('new_team')
@@ -166,10 +169,11 @@ class Room:
         """Check if a player is the host."""
         return player_id == self.host_id
     
-    def to_dict(self):
+    def to_dict(self, asker_id=None):
         """
         Return a dictionary representation of the room.
-        
+        Args:
+            asker_id (str, optional): ID of the player asking for the room data.
         Returns:
             dict: Room data for serialization
         """
@@ -186,6 +190,5 @@ class Room:
             'room_id': self.room_id,
             'host_id': self.host_id,
             'players': players_data,
-            'status': self.game.state,
-            'game': self.game.to_dict() if self.game else {}
+            'game': self.game.to_dict(asker_id)
         }

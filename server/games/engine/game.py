@@ -334,14 +334,12 @@ class Game:
         else:
             raise ValueError(f"Unknown move type: {move_type}")
     
-    def to_dict(self, include_hands=True):
+    def to_dict(self, asker_id):
         """
         Return a dictionary representation of the game.
         
         Args:
-            include_hands (bool): Whether to include the cards in players' hands
-                                 (typically true for the player's own view,
-                                  false for other players)
+            asker_id: ID of the player requesting the game state
         
         Returns:
             dict: Game data for serialization
@@ -349,6 +347,7 @@ class Game:
         players_data = []
         for player in self.players.values():
             player_data = player.to_dict()
+            include_hands = (self.state == IN_PROGRESS and player.id == asker_id)
             if not include_hands:
                 # Remove the actual cards, but keep the count
                 player_data['hand'] = []
