@@ -28,7 +28,7 @@ class Game:
         self.scores = {1: 0, 2: 0}  # Map team IDs to scores (teams are 1 and 2)
         self.state = NOT_STARTED
         self.winning_team = None
-        self.last_action = None  # Details about the most recent action
+        self.last_ask = None  # Details about the most recent ask
     
     def get_player(self, player_id):
         """
@@ -87,12 +87,6 @@ class Game:
         self.deal_cards()
 
         self.state = IN_PROGRESS
-        self.record_action({
-            'type': 'game_start',
-            'starting_player': starting_player.id,
-            'starting_player_name': starting_player.name,
-            'starting_team': starting_player.team
-        })
     
     def deal_cards(self):
         """
@@ -120,21 +114,6 @@ class Game:
             self.winning_team = 2
         else:
             self.winning_team = None  # It's a tie
-            
-        self.record_action({
-            'type': 'game_end',
-            'scores': self.scores.copy(),
-            'winning_team': self.winning_team
-        })
-    
-    def record_action(self, action_data):
-        """
-        Record the most recent action.
-        
-        Args:
-            action_data (dict): Data describing the action
-        """
-        self.last_action = action_data
     
     def get_current_player(self):
         """
@@ -200,31 +179,18 @@ class Game:
         
         success = asked_player.has_card(card)
         
-        action_data = {
-            'type': 'ask_card',
-            'asking_player': asking_player_id,
-            'asking_player_name': asking_player.name,
-            'asked_player': asked_player_id,
-            'asked_player_name': asked_player.name,
+        if success:
+            asked_player.remove_card(card)
+            asking_player.add_card(card)
+        else:
+            self.current_turn_player_id = asked_player_id
+        self.last_ask = {
+            'askingPlayerId': asking_player_id,
+            'askedPlayerId': asked_player_id,
             'card': card,
             'success': success
         }
         
-        if success:
-            # Transfer card from asked player to asking player
-            asked_player.remove_card(card)
-            asking_player.add_card(card)
-            action_data['transfer'] = True
-            
-            # Successful ask: asking player gets another turn
-            # The current_turn_player_id stays the same
-        else:
-            # Unsuccessful ask: turn passes to the asked player
-            self.current_turn_player_id = asked_player_id
-            action_data['next_player'] = asked_player_id
-            action_data['next_player_name'] = asked_player.name
-        
-        self.record_action(action_data)
     
     def claim_set(self, set_number, declaring_player_id):
         """
@@ -261,16 +227,7 @@ class Game:
             winning_team = 2 if declaring_player.team == 1 else 1
 
         self.claimed_sets[set_number] = winning_team
-        self.scores[winning_team] += 1
-        
-        self.record_action({
-            'type': 'claim_set',
-            'set': set_number,
-            'set_name': get_set_name(set_number),
-            'team': winning_team,
-            'declaring_player': declaring_player_id
-        })
-        
+        self.scores[winning_team] += 1   
         # Check if the game has ended
         if len(self.claimed_sets) == 9:  # All sets have been claimed
             self.end_game()
@@ -297,12 +254,6 @@ class Game:
             raise ValueError("Cannot pass turn to yourself")
         
         self.current_turn_player_id = teammate_id
-        self.record_action({
-            'type': 'pass_turn',
-            'passer': passer_id,
-            'teammate': teammate_id,
-            'teammate_name': teammate_player.name
-        })
     
     def make_move(self, mover_id, move_data):
         """
@@ -354,16 +305,14 @@ class Game:
             players_data.append(player_data)
         
         current_player = self.get_current_player()
-        current_team = current_player.team if current_player else None
             
         return {
-            'game_id': self.game_id,
+            'gameId': self.game_id,
             'players': players_data,
-            'current_player_id': self.current_turn_player_id,
-            'current_team': current_team,
-            'claimed_sets': self.claimed_sets,
+            'currentPlayerId': self.current_turn_player_id,
+            'claimedSets': self.claimed_sets,
             'scores': self.scores,
             'state': self.state,
-            'winning_team': self.winning_team,
-            'last_action': self.last_action
+            'winningTeam': self.winning_team,
+            'lastAsk': self.last_ask
         }

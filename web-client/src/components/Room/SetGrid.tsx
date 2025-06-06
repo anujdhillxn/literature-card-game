@@ -1,6 +1,6 @@
 // src/components/Room/SetGrid.tsx
 import React from 'react';
-import { SET_NAMES } from '../../types';
+import { SET_NAMES } from '../../utils/cardHelpers';
 
 interface SetGridProps {
     claimedSets: Record<number, 1 | 2>;

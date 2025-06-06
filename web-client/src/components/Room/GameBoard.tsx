@@ -4,9 +4,9 @@ import { type Card as CardType, type Player, type RoomState } from '../../types'
 import PlayerList from './PlayerList';
 import SetGrid from './SetGrid';
 import Card from './Card';
-import LastAction from './LastAction';
+import LastAsk from './LastAsk';
 import ErrorMessage from '../ErrorMessage';
-import { generateAllCards, getPlayerName } from '../../utils/cardHelpers';
+import { ALL_CARDS, getPlayerName, getPlayerTeam, SET_NAMES } from '../../utils/cardHelpers';
 
 interface GameBoardProps {
     roomId: string;
@@ -48,12 +48,13 @@ const GameBoard: React.FC<GameBoardProps> = ({
     onCancelAction
 }) => {
     return (
-        <div className="room game-active">
+        <div className="game-active">
             {errorMessage && <ErrorMessage message={errorMessage} />}
             <h2>Room: {roomId}</h2>
+            <button onClick={onLeaveRoom} className="leave-btn">Leave Room</button>
             <div className="game-status">
                 <div className="turn-indicator">
-                    Current Turn: <strong>{getPlayerName(roomState.game.players, roomState.game.current_player_id!)}</strong> (Team {roomState.game.current_team})
+                    Current Turn: <strong>{getPlayerName(roomState.game.players, roomState.game.currentPlayerId!)}</strong> (Team {getPlayerTeam(roomState.game.players, roomState.game.currentPlayerId!)})
                     {isMyTurn && <span className="your-turn"> - Your Turn!</span>}
                 </div>
 
@@ -64,9 +65,8 @@ const GameBoard: React.FC<GameBoardProps> = ({
             </div>
 
             <div className="last-action">
-                <LastAction
-                    lastAction={roomState.game.last_action}
-                    players={roomState.game.players}
+                <LastAsk
+                    lastAsk={roomState.game.lastAsk}
                 />
             </div>
 
@@ -76,32 +76,31 @@ const GameBoard: React.FC<GameBoardProps> = ({
                         team={1}
                         players={roomState.game.players}
                         userId={userId}
-                        currentPlayerId={roomState.game.current_player_id}
+                        currentPlayerId={roomState.game.currentPlayerId}
                         selectedPlayerId={selectedPlayer}
                         isPlaying={true}
                         currentUserTeam={currentPlayer?.team}
                         onSelectPlayer={onSelectPlayer}
-                    />
-
-                    <SetGrid
-                        claimedSets={roomState.game.claimed_sets}
-                        canClaimSets={isMyTurn}
-                        selectedSet={selectedSet}
-                        onSelectSet={onSelectSet}
-                        onClaimSet={onClaimSet}
                     />
 
                     <PlayerList
                         team={2}
                         players={roomState.game.players}
                         userId={userId}
-                        currentPlayerId={roomState.game.current_player_id}
+                        currentPlayerId={roomState.game.currentPlayerId}
                         selectedPlayerId={selectedPlayer}
                         isPlaying={true}
                         currentUserTeam={currentPlayer?.team}
                         onSelectPlayer={onSelectPlayer}
                     />
                 </div>
+                <SetGrid
+                    claimedSets={roomState.game.claimedSets}
+                    canClaimSets={isMyTurn}
+                    selectedSet={selectedSet}
+                    onSelectSet={onSelectSet}
+                    onClaimSet={onClaimSet}
+                />
 
                 <div className="your-hand">
                     <h3>Your Hand</h3>
@@ -128,36 +127,61 @@ const GameBoard: React.FC<GameBoardProps> = ({
                         </div>
                     ) : (
                         <div className="cards-container">
-                            {generateAllCards().map(card => {
-                                const isInHand = currentPlayer?.hand?.includes(card);
-                                return (
-                                    <div key={card} className="card-wrapper">
-                                        <Card
-                                            card={card}
-                                            isSelected={selectedCard === card}
-                                            onSelect={onSelectCard}
-                                            disabled={Boolean(isInHand)} // Pass disabled state to Card
-                                        />
-                                    </div>
-                                );
-                            })}
+                            {currentPlayer.hand.map(card => (
+                                <div key={card} className="card-wrapper">
+                                    <Card
+                                        card={card}
+                                        isSelected={false}
+                                        displayOnly={true}
+                                    />
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
 
-                {isMyTurn && selectedPlayer && selectedCard && (
-                    <div className="action-controls">
-                        <button onClick={onAskCard}>
-                            Ask {getPlayerName(roomState.game.players, selectedPlayer)} for {selectedCard}
-                        </button>
-                        <button onClick={onCancelAction}>
-                            Cancel
-                        </button>
+                {isMyTurn && selectedPlayer && (
+                    <div className="card-selection-overlay">
+                        <div className="card-selection-dialog">
+                            <h3>Ask {getPlayerName(roomState.game.players, selectedPlayer)} for a card:</h3>
+                            <div className="cards-selection-grid">
+                                {SET_NAMES.map((setName, index) => {
+                                    const startIndex = index * 6;
+                                    const endIndex = startIndex + 6;
+
+                                    return (
+                                        <React.Fragment key={`set-${index + 1}`}>
+                                            {ALL_CARDS.slice(startIndex, endIndex).map(card => (
+                                                <div key={card} className="card-wrapper">
+                                                    <Card
+                                                        card={card}
+                                                        isSelected={selectedCard === card}
+                                                        onSelect={onSelectCard}
+                                                        disabled={currentPlayer?.hand?.includes(card)}
+                                                    />
+                                                </div>
+                                            ))}
+                                            <div className="set-divider" data-set-name={setName}></div>
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </div>
+                            <div className="dialog-actions">
+                                <button
+                                    className="ask-button"
+                                    disabled={!selectedCard}
+                                    onClick={onAskCard}
+                                >
+                                    Ask for Card
+                                </button>
+                                <button onClick={onCancelAction}>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
-
-            <button onClick={onLeaveRoom} className="leave-btn">Leave Room</button>
         </div>
     );
 };

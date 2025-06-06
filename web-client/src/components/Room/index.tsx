@@ -59,7 +59,7 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
     // Current player state
     const currentPlayer = roomState?.game?.players?.find(p => p.id === userId);
     const isHost = roomState?.host_id === userId;
-    const isMyTurn = roomState?.game?.current_player_id === userId;
+    const isMyTurn = roomState?.game?.currentPlayerId === userId;
     const gameStarted = roomState?.game?.state === 'in_progress';
     const gameEnded = roomState?.game?.state === 'ended';
 
@@ -188,56 +188,63 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
         return <div className="loading">Connecting to room {roomId}...</div>;
     }
 
-    if (gameEnded) {
-        return (
-            <GameOver
-                roomId={roomId}
-                roomState={roomState}
-                errorMessage={displayError}
-                onLeaveRoom={handleLeaveRoom}
-            />
-        );
-    }
+    const currentState = () => {
 
-    if (gameStarted) {
+        if (gameEnded) {
+            return (
+                <GameOver
+                    roomId={roomId}
+                    roomState={roomState}
+                    errorMessage={displayError}
+                    onLeaveRoom={handleLeaveRoom}
+                />
+            );
+        }
+
+        if (gameStarted) {
+            return (
+                <GameBoard
+                    roomId={roomId}
+                    userId={userId}
+                    roomState={roomState}
+                    isMyTurn={!!isMyTurn}
+                    errorMessage={displayError}
+                    selectedPlayer={selectedPlayer}
+                    selectedCard={selectedCard}
+                    selectedSet={selectedSet}
+                    currentPlayer={currentPlayer}
+                    onSelectPlayer={setSelectedPlayer}
+                    onSelectCard={setSelectedCard}
+                    onSelectSet={setSelectedSet}
+                    onAskCard={handleAskCard}
+                    onClaimSet={handleClaimSet}
+                    onPassTurn={handlePassTurn}
+                    onLeaveRoom={handleLeaveRoom}
+                    onCancelAction={handleCancelAction}
+                />
+            );
+        }
+
         return (
-            <GameBoard
+            <PreGame
                 roomId={roomId}
                 userId={userId}
                 roomState={roomState}
-                isMyTurn={!!isMyTurn}
+                connectionStatus={status}
+                isHost={!!isHost}
                 errorMessage={displayError}
-                selectedPlayer={selectedPlayer}
-                selectedCard={selectedCard}
-                selectedSet={selectedSet}
-                currentPlayer={currentPlayer}
-                onSelectPlayer={setSelectedPlayer}
-                onSelectCard={setSelectedCard}
-                onSelectSet={setSelectedSet}
-                onAskCard={handleAskCard}
-                onClaimSet={handleClaimSet}
-                onPassTurn={handlePassTurn}
+                onChangeTeam={handleChangeTeam}
+                onChangeHost={handleChangeHost}
+                onStartGame={handleStartGame}
                 onLeaveRoom={handleLeaveRoom}
-                onCancelAction={handleCancelAction}
+                currentTeam={currentPlayer?.team}
             />
         );
     }
 
-    return (
-        <PreGame
-            roomId={roomId}
-            userId={userId}
-            roomState={roomState}
-            connectionStatus={status}
-            isHost={!!isHost}
-            errorMessage={displayError}
-            onChangeTeam={handleChangeTeam}
-            onChangeHost={handleChangeHost}
-            onStartGame={handleStartGame}
-            onLeaveRoom={handleLeaveRoom}
-            currentTeam={currentPlayer?.team}
-        />
-    );
+    return <div className='room'>
+        {currentState()}
+    </div>
 };
 
 export default Room;

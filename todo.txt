@@ -3,7 +3,7 @@ authentication
 allow room creation only for authenticated users
 elo
 room-game inheritance refactor?
-ui improvement
-better error handling in ui
+better error and game log handling in ui
 - validations in different functions
 bots?
+room exit broken

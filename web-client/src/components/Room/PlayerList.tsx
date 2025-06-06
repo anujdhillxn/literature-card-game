@@ -31,7 +31,7 @@ const PlayerList: React.FC<PlayerListProps> = ({
 
     if (!teamPlayers.length) {
         return (
-            <div className={`team team${team}`}>
+            <div className={`team-container team${team}`}>
                 <h3>Team {team}</h3>
                 <p>No players</p>
             </div>
@@ -39,7 +39,7 @@ const PlayerList: React.FC<PlayerListProps> = ({
     }
 
     return (
-        <div className={`team team${team}`}>
+        <div className={`team-container team${team}`}>
             <h3>Team {team}</h3>
             <ul>
                 {teamPlayers.map(p => {

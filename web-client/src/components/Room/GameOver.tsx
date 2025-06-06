@@ -1,7 +1,8 @@
 // src/components/Room/GameOver.tsx
 import React from 'react';
-import { type RoomState, SET_NAMES } from '../../types';
+import { type RoomState } from '../../types';
 import ErrorMessage from '../ErrorMessage';
+import { SET_NAMES } from '../../utils/cardHelpers';
 
 interface GameOverProps {
     roomId: string;
@@ -17,7 +18,7 @@ const GameOver: React.FC<GameOverProps> = ({
     onLeaveRoom
 }) => {
     return (
-        <div className="room game-ended">
+        <div className="game-ended">
             {errorMessage && <ErrorMessage message={errorMessage} />}
             <h2>Game Over - Room: {roomId}</h2>
 
@@ -30,8 +31,8 @@ const GameOver: React.FC<GameOverProps> = ({
 
                 <h3>Winner</h3>
                 <div className="winner">
-                    {roomState.game.winning_team ?
-                        `Team ${roomState.game.winning_team} wins!` :
+                    {roomState.game.winningTeam ?
+                        `Team ${roomState.game.winningTeam} wins!` :
                         "It's a tie!"}
                 </div>
             </div>
@@ -41,7 +42,7 @@ const GameOver: React.FC<GameOverProps> = ({
                 <div className="sets-grid">
                     {SET_NAMES.map((name, index) => {
                         const setNumber = index + 1;
-                        const team = roomState.game.claimed_sets[setNumber];
+                        const team = roomState.game.claimedSets[setNumber];
                         return (
                             <div
                                 key={setNumber}

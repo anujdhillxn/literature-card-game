@@ -10,16 +10,22 @@ export type Player = {
     is_host?: boolean;
 };
 
+export type Ask = {
+    askingPlayerId: number;
+    askedPlayerId: number;
+    card: Card;
+    success: boolean;
+};
+
 export type GameState = {
-    game_id: string;
+    gameId: string;
     players: Player[];
-    current_player_id: number | null;
-    current_team: 1 | 2 | null;
-    claimed_sets: Record<number, 1 | 2>;
+    currentPlayerId: number | null;
+    claimedSets: Record<number, 1 | 2>;
     scores: Record<number, number>;
     state: "not_started" | "in_progress" | "ended";
-    winning_team: 1 | 2 | null;
-    last_action: any;
+    winningTeam: 1 | 2 | null;
+    lastAsk: Ask | null;
 };
 
 export type RoomState = {
@@ -35,16 +41,3 @@ export type WebSocketMessage = {
     success?: boolean;
     error?: string;
 };
-
-// Set names constant
-export const SET_NAMES = [
-    "LOWER_CLUBS",
-    "HIGHER_CLUBS",
-    "LOWER_DIAMONDS",
-    "HIGHER_DIAMONDS",
-    "LOWER_HEARTS",
-    "HIGHER_HEARTS",
-    "LOWER_SPADES",
-    "HIGHER_SPADES",
-    "SEVENS_AND_JOKERS",
-];

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Login from './components/Login';
 import Lobby from './components/Lobby';
 import Room from './components/Room';
-
+import './App.css';
 function App() {
   const [username, setUsername] = useState<string>('');
   const [userId, setUserId] = useState<number | null>(null);
@@ -23,9 +23,7 @@ function App() {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: '0 auto', padding: '1rem' }}>
-      <h1>Literature Lobby</h1>
-
+    <div className="app-container">
       {!userId ? (
         <Login onLogin={handleLogin} />
       ) : currentRoomId ? (

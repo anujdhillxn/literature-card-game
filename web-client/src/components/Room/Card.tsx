@@ -4,15 +4,21 @@ import { type Card as CardType } from '../../types';
 
 interface CardProps {
     card: CardType;
-    isSelected: boolean;
+    isSelected?: boolean;
     disabled?: boolean;
-    onSelect: (card: CardType) => void;
+    displayOnly?: boolean;
+    onSelect?: (card: CardType) => void;
 }
 
-const Card = ({ card, isSelected, disabled, onSelect }: CardProps): React.JSX.Element => {
+const Card = ({
+    card,
+    isSelected = false,
+    disabled = false,
+    displayOnly = false,
+    onSelect
+}: CardProps): React.JSX.Element => {
     const rank = card[0];
     const suit = card[1];
-    const setNumber = parseInt(card[2], 10);
 
     let suitSymbol = "";
     let color = "";
@@ -43,14 +49,19 @@ const Card = ({ card, isSelected, disabled, onSelect }: CardProps): React.JSX.El
     let displayRank = rank;
     if (rank === "1") displayRank = "10";
 
+    const handleClick = () => {
+        if (!disabled && !displayOnly && onSelect) {
+            onSelect(card);
+        }
+    };
+
     return (
         <div
-            className={`card ${color} ${isSelected ? "selected" : ""} ${disabled ? "disabled" : ""}`}
-            onClick={() => !disabled && onSelect(card)}
+            className={`card ${color} ${isSelected ? "selected" : ""} ${disabled ? "disabled" : ""} ${displayOnly ? "display-only" : ""}`}
+            onClick={handleClick}
         >
             <span className="rank">{displayRank}</span>
             <span className="suit">{suitSymbol}</span>
-            <span className="set">Set {setNumber}</span>
         </div>
     );
 };
