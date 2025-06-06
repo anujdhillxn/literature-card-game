@@ -1,0 +1,9 @@
+url params based rooms (take token for random users via url)
+authentication
+allow room creation only for authenticated users
+elo
+room-game inheritance refactor?
+ui improvement
+better error handling in ui
+- validations in different functions
+bots?

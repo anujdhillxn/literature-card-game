@@ -1,0 +1,363 @@
+/* src/components/Room.css */
+.room {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: Arial, sans-serif;
+}
+
+.error {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+}
+
+/* Teams in lobby */
+.teams-container {
+  display: flex;
+  gap: 2rem;
+  margin: 1.5rem 0;
+}
+
+.team {
+  flex: 1;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.team1 {
+  background-color: rgba(173, 216, 230, 0.2);
+}
+
+.team2 {
+  background-color: rgba(255, 182, 193, 0.2);
+}
+
+.team h3 {
+  margin-top: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.team ul {
+  padding-left: 20px;
+  margin-bottom: 20px;
+}
+
+.team li {
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.team li.you {
+  font-weight: bold;
+  background-color: rgba(255, 255, 0, 0.1);
+}
+
+.host-badge, .you-badge {
+  font-size: 0.8em;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 8px;
+}
+
+.host-badge {
+  background-color: #ffd700;
+  color: #333;
+}
+
+.you-badge {
+  background-color: #4caf50;
+  color: white;
+}
+
+.make-host-btn {
+  font-size: 0.8em;
+  padding: 2px 6px;
+}
+
+.room-controls {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+button {
+  cursor: pointer;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #2196f3;
+  color: white;
+  font-weight: bold;
+}
+
+button:hover {
+  background-color: #1976d2;
+}
+
+button:disabled {
+  background-color: #bdbdbd;
+  cursor: not-allowed;
+}
+
+.start-btn {
+  background-color: #4caf50;
+}
+
+.start-btn:hover {
+  background-color: #388e3c;
+}
+
+.leave-btn {
+  background-color: #f44336;
+}
+
+.leave-btn:hover {
+  background-color: #d32f2f;
+}
+
+/* Game in progress */
+.game-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.your-turn {
+  color: #4caf50;
+  font-weight: bold;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+.score {
+  display: flex;
+  gap: 1rem;
+}
+
+.team1, .team2 {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.last-action {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #fff8e1;
+  border-radius: 8px;
+  border-left: 4px solid #ffc107;
+}
+
+.game-board {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.teams-panel {
+  display: flex;
+  gap: 1rem;
+}
+
+.player.selected {
+  background-color: #ffd180;
+  border-radius: 4px;
+}
+
+.player.current-turn {
+  font-weight: bold;
+}
+
+/* Card styling */
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+.card {
+  width: 60px;
+  height: 90px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.card:hover {
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+.card.selected {
+  box-shadow: 0 0 8px gold;
+  border: 2px solid gold;
+}
+
+.card.red {
+  color: #d32f2f;
+}
+
+.card.black {
+  color: #212121;
+}
+
+.card .rank {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.card .suit {
+  font-size: 1.5em;
+  text-align: center;
+}
+
+.card .set {
+  font-size: 0.7em;
+  text-align: right;
+}
+
+.joker {
+  font-weight: bold;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.claimed-sets {
+  flex-grow: 1;
+}
+
+.sets-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.set {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.set:hover:not(.team1):not(.team2) {
+  background-color: #f5f5f5;
+}
+
+.set.selected {
+  border-color: gold;
+  box-shadow: 0 0 8px gold;
+}
+
+.set.team1 {
+  background-color: rgba(173, 216, 230, 0.3);
+  border-color: #90caf9;
+}
+
+.set.team2 {
+  background-color: rgba(255, 182, 193, 0.3);
+  border-color: #f48fb1;
+}
+
+.set-number {
+  font-weight: bold;
+}
+
+.set-name {
+  font-size: 0.8em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.claimed-by {
+  margin-top: 5px;
+  font-weight: bold;
+  font-size: 0.8em;
+}
+
+.no-cards {
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.pass-turn {
+  margin-top: 1rem;
+}
+
+.teammate-options {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.action-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.game-result {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.winner {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #4caf50;
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: #f1f8e9;
+  border-radius: 8px;
+}
+
+.game-info {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #e3f2fd;
+  border-radius: 8px;
+}
+
+.game-info h3 {
+  margin-top: 0;
+}
+
+.card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #eee;
+}
