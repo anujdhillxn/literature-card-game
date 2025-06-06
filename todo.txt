@@ -1,9 +1,8 @@
-url params based rooms (take token for random users via url)
+validations in different functions
+better error and game log handling in ui
+add private/public rooms
+room-game inheritance refactor?
 authentication
 allow room creation only for authenticated users
 elo
-room-game inheritance refactor?
-better error and game log handling in ui
-- validations in different functions
 bots?
-room exit broken
