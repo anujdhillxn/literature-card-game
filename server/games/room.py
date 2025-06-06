@@ -52,10 +52,15 @@ class Room:
         if not player_name:
             raise ValueError("Player name cannot be empty")
         
-        player_id = uuid.uuid4().hex
-        player = Player(player_id, player_name, player_token, team=1 if len(self.players) % 2 == 0 else 2)
-        if not self.host_token:
-            self.host_token = player_token
+        if self.game.state == NOT_STARTED:
+            player_id = uuid.uuid4().hex 
+            player = Player(player_id, player_name, player_token, team=1 if len(self.players) % 2 == 0 else 2)
+            if not self.host_token:
+                self.host_token = player_token
+        else:
+            player = self.game.get_player_by_token(player_token)
+            if not player:
+                raise ValueError("Game has already started, cannot add new players")
         self.players[player_token] = player
     
     def remove_player(self, remove_requester, player_id):
@@ -74,7 +79,6 @@ class Room:
             raise ValueError("Only the host or the player themselves can be removed")
         
         del self.players[player.token]
-            
         if self.players and self.is_host(player):
             self.host_token = next(iter(self.players.keys()))
     
@@ -196,18 +200,18 @@ class Room:
         """
         asker = self.get_player_by_token(asker_token, raise_if_not_found=False)
         players_data = []
-        host = self.get_player_by_token(self.host_token)
+        host = self.get_player_by_token(self.host_token, raise_if_not_found=False)
         for player in self.players.values():
             players_data.append({
                 'id': player.id,
                 'name': player.name,
                 'team': player.team,
-                'is_host': player.id == host.id,
+                'is_host': host and player.id == host.id,
             })
             
         return {
             'room_id': self.room_id,
-            'hostId': host.id,
+            'hostId': host.id if host else None,
             'players': players_data,
             'receiverId': asker.id,
             'game': self.game.to_dict(asker.id if asker else None),

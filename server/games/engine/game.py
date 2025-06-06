@@ -45,6 +45,21 @@ class Game:
                 return player
         raise ValueError(f"Player with ID {player_id} not found")
     
+    def get_player_by_token(self, token):
+        """
+        Get a player by their token.
+        
+        Args:
+            token: Player's unique token
+            
+        Returns:
+            Player: The player object or None if not found
+        """
+        for player in self.players:
+            if player.token == token:
+                return player
+        return None
+    
     def get_team_players(self, team):
         """
         Get all players belonging to a specific team.
@@ -82,7 +97,8 @@ class Game:
             raise ValueError(f"Each team must have exactly 3 players (Team 1: {team1_count}, Team 2: {team2_count})")
             
         if len(players) != 6: raise ValueError("Exactly 6 players required")
-        self.players = players
+        for player in players:
+            self.players.append()
         # Randomly select a starting player
         starting_player = random.choice(list(self.players))
         self.current_turn_player_id = starting_player.id
