@@ -1,4 +1,4 @@
-import type { Card } from "../types";
+import type { Card, Player } from "../types";
 
 export const ALL_CARDS: Card[] = [
     // Set 1: LOWER_CLUBS
@@ -86,18 +86,12 @@ export const SET_NAMES = [
     "Sevens & Jokers",
 ];
 
-export const getPlayerTeam = (
-    players: Array<{ id: number; team: 1 | 2 }> | undefined,
-    id: number
-): 1 | 2 => {
+export const getPlayerTeam = (players: Player[], id: string): 1 | 2 => {
     const player = players?.find((p) => p.id === id);
     return player?.team || 1; // Default to team 1 if not found
 };
 
-export const getPlayerName = (
-    players: Array<{ id: number; name: string }> | undefined,
-    id: number
-): string => {
+export const getPlayerName = (players: Player[], id: string): string => {
     const player = players?.find((p) => p.id === id);
     return player?.name || `Player ${id}`;
 };

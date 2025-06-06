@@ -21,26 +21,25 @@ import './Room.css';
 
 interface RoomProps {
     roomId: string;
-    userId: number;
+    userToken: number;
     username: string;
     onLeaveRoom: () => void;
 }
 
-const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) => {
+const Room: React.FC<RoomProps> = ({ roomId, userToken, username, onLeaveRoom }) => {
     // State
     const [roomState, setRoomState] = useState<RoomState | null>(null);
-    const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
+    const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
     const [selectedCard, setSelectedCard] = useState<Card | null>(null);
     const [selectedSet, setSelectedSet] = useState<number | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
     // Process WebSocket messages
     const handleMessage = useCallback((data: WebSocketMessage): void => {
         if (data.error) {
             setErrorMessage(data.error);
             return;
         }
-
+        console.log("Received message:", data);
         if (data.currentState) {
             setRoomState(data.currentState);
         }
@@ -49,7 +48,7 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
     // Connect to the room
     const { status, error, sendMessage, closeConnection } = useWebSocket(
         roomId,
-        { userId, username },
+        { userToken, username },
         handleMessage
     );
 
@@ -57,11 +56,14 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
     const displayError = error || errorMessage;
 
     // Current player state
+    const userId = roomState?.receiverId;
     const currentPlayer = roomState?.game?.players?.find(p => p.id === userId);
-    const isHost = roomState?.host_id === userId;
+    const isHost = roomState?.hostId === userId;
     const isMyTurn = roomState?.game?.currentPlayerId === userId;
     const gameStarted = roomState?.game?.state === 'in_progress';
     const gameEnded = roomState?.game?.state === 'ended';
+
+    console.log("Current Player:", currentPlayer);
 
     // Clear error message after 5 seconds
     useEffect((): (() => void) => {
@@ -76,8 +78,7 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
     const handleChangeTeam = (newTeam: 1 | 2): void => {
         const action: ChangeTeamAction = {
             type: 'change_team',
-            actor_id: userId,
-            player_id: userId,
+            player_id: userId!,
             new_team: newTeam,
             room_id: roomId
         };
@@ -89,7 +90,6 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
 
         const action: StartGameAction = {
             type: 'start_game',
-            actor_id: userId,
             room_id: roomId
         };
         sendMessage(action);
@@ -98,8 +98,7 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
     const handleLeaveRoom = (): void => {
         const action: RemovePlayerAction = {
             type: 'remove_player',
-            actor_id: userId,
-            player_id: userId,
+            player_id: userId!,
             room_id: roomId
         };
         sendMessage(action);
@@ -108,12 +107,11 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
         onLeaveRoom();
     };
 
-    const handleChangeHost = (newHostId: number): void => {
+    const handleChangeHost = (newHostId: string): void => {
         if (!isHost) return;
 
         const action: ChangeHostAction = {
             type: 'change_host',
-            actor_id: userId,
             new_host_id: newHostId,
             room_id: roomId
         };
@@ -131,7 +129,6 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
 
         const action: MakeMoveAction = {
             type: 'make_move',
-            actor_id: userId,
             room_id: roomId,
             move_data: moveData
         };
@@ -151,7 +148,6 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
 
         const action: MakeMoveAction = {
             type: 'make_move',
-            actor_id: userId,
             room_id: roomId,
             move_data: moveData
         };
@@ -160,7 +156,7 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
         setSelectedSet(null);
     };
 
-    const handlePassTurn = (teammateId: number): void => {
+    const handlePassTurn = (teammateId: string): void => {
         if (!isMyTurn) return;
 
         const moveData: PassTurnMove = {
@@ -170,7 +166,6 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
 
         const action: MakeMoveAction = {
             type: 'make_move',
-            actor_id: userId,
             room_id: roomId,
             move_data: moveData
         };
@@ -189,7 +184,9 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
     }
 
     const currentState = () => {
-
+        if (!userId) {
+            return <div className="error">Error: User ID not found in room state.</div>;
+        }
         if (gameEnded) {
             return (
                 <GameOver
@@ -200,8 +197,7 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
                 />
             );
         }
-
-        if (gameStarted) {
+        if (gameStarted && currentPlayer) {
             return (
                 <GameBoard
                     roomId={roomId}
@@ -224,7 +220,6 @@ const Room: React.FC<RoomProps> = ({ roomId, userId, username, onLeaveRoom }) =>
                 />
             );
         }
-
         return (
             <PreGame
                 roomId={roomId}

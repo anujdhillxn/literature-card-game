@@ -2,7 +2,7 @@
 export type Card = string; // Format: "AC1", "2H5", etc.
 
 export type Player = {
-    id: number;
+    id: string;
     name: string;
     team: 1 | 2;
     hand?: Card[];
@@ -20,7 +20,7 @@ export type Ask = {
 export type GameState = {
     gameId: string;
     players: Player[];
-    currentPlayerId: number | null;
+    currentPlayerId: string | null;
     claimedSets: Record<number, 1 | 2>;
     scores: Record<number, number>;
     state: "not_started" | "in_progress" | "ended";
@@ -30,9 +30,10 @@ export type GameState = {
 
 export type RoomState = {
     room_id: string;
-    host_id: number;
+    hostId: string;
     players: Player[];
     game: GameState;
+    receiverId: string;
 };
 
 export type WebSocketMessage = {

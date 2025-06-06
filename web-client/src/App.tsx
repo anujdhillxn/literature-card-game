@@ -6,12 +6,12 @@ import Room from './components/Room';
 import './App.css';
 function App() {
   const [username, setUsername] = useState<string>('');
-  const [userId, setUserId] = useState<number | null>(null);
+  const [userToken, setUserToken] = useState<number | null>(null);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
 
-  const handleLogin = (username: string, userId: number) => {
+  const handleLogin = (username: string, userToken: number) => {
     setUsername(username);
-    setUserId(userId);
+    setUserToken(userToken);
   };
 
   const handleRoomJoin = (roomId: string) => {
@@ -24,19 +24,18 @@ function App() {
 
   return (
     <div className="app-container">
-      {!userId ? (
+      {!userToken || !username ? (
         <Login onLogin={handleLogin} />
       ) : currentRoomId ? (
         <Room
           roomId={currentRoomId}
-          userId={userId}
+          userToken={userToken}
           username={username}
           onLeaveRoom={handleLeaveRoom}
         />
       ) : (
         <Lobby
           username={username}
-          userId={userId}
           onRoomJoin={handleRoomJoin}
         />
       )}

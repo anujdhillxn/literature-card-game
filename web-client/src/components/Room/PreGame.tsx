@@ -5,13 +5,13 @@ import ErrorMessage from '../ErrorMessage';
 
 interface PreGameProps {
     roomId: string;
-    userId: number;
+    userId: string;
     roomState: RoomState;
     connectionStatus: string;
     isHost: boolean;
     errorMessage: string | null;
     onChangeTeam: (team: 1 | 2) => void;
-    onChangeHost: (hostId: number) => void;
+    onChangeHost: (hostId: string) => void;
     onStartGame: () => void;
     onLeaveRoom: () => void;
     currentTeam?: 1 | 2;
@@ -68,13 +68,13 @@ const PreGame: React.FC<PreGameProps> = ({
                 <button onClick={onLeaveRoom} className="leave-btn">Leave Room</button>
             </div>
             <div className="team-selection">
-                {currentTeam !== 1 && team1PlayerCount < 3 && (
+                {currentTeam !== 1 && (
                     <button onClick={() => onChangeTeam(1)}>
                         Join Team 1
                     </button>
                 )}
 
-                {currentTeam !== 2 && team2PlayerCount < 3 && (
+                {currentTeam !== 2 && (
                     <button onClick={() => onChangeTeam(2)}>
                         Join Team 2
                     </button>

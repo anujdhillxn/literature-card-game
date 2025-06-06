@@ -22,7 +22,7 @@ class Game:
             game_id: Unique identifier for the game
         """
         self.game_id = game_id
-        self.players = {}  # Will be populated in start_game
+        self.players = []  # Will be populated in start_game
         self.current_turn_player_id = None
         self.claimed_sets = {}  # Map set numbers to the team that claimed it
         self.scores = {1: 0, 2: 0}  # Map team IDs to scores (teams are 1 and 2)
@@ -40,7 +40,10 @@ class Game:
         Returns:
             Player: The player object or None if not found
         """
-        return self.players.get(player_id)
+        for player in self.players:
+            if player.id == player_id:
+                return player
+        raise ValueError(f"Player with ID {player_id} not found")
     
     def get_team_players(self, team):
         """
@@ -52,14 +55,14 @@ class Game:
         Returns:
             list: List of Player objects in the team
         """
-        return [player for player in self.players.values() if player.team == team]
+        return [player for player in self.players if player.team == team]
     
     def start_game(self, players):
         """
         Start the game with the provided players and a randomly selected starting player.
         
         Args:
-            players: Dictionary of player_id -> Player objects
+            players: List of Player objects to start the game with.
             
         Raises:
             ValueError: If there are not exactly 3 players on each team
@@ -72,8 +75,8 @@ class Game:
             raise ValueError("Game has already started or ended")
             
         # Count players on each team
-        team1_count = sum(1 for p in players.values() if p.team == 1)
-        team2_count = sum(1 for p in players.values() if p.team == 2)
+        team1_count = sum(1 for p in players if p.team == 1)
+        team2_count = sum(1 for p in players if p.team == 2)
         
         if team1_count != 3 or team2_count != 3:
             raise ValueError(f"Each team must have exactly 3 players (Team 1: {team1_count}, Team 2: {team2_count})")
@@ -81,7 +84,7 @@ class Game:
         if len(players) != 6: raise ValueError("Exactly 6 players required")
         self.players = players
         # Randomly select a starting player
-        starting_player = random.choice(list(self.players.values()))
+        starting_player = random.choice(list(self.players))
         self.current_turn_player_id = starting_player.id
         
         self.deal_cards()
@@ -97,7 +100,7 @@ class Game:
         deck = list(ALL_CARDS)
         random.shuffle(deck)
         
-        for player in self.players.values():
+        for player in self.players:
             player.hand = set(deck[:9])
             deck = deck[9:]
     
@@ -218,7 +221,7 @@ class Game:
         cards_needed = get_set_cards(set_number)
         cards_held = self.get_cards_held_by_team(declaring_player.team)
 
-        for player in self.players.values():
+        for player in self.players:
             player.hand = set([card for card in player.hand if card not in cards_needed])
     
         if cards_needed.issubset(cards_held):
@@ -296,16 +299,14 @@ class Game:
             dict: Game data for serialization
         """
         players_data = []
-        for player in self.players.values():
+        for player in self.players:
             player_data = player.to_dict()
-            include_hands = (self.state == IN_PROGRESS and player.id == asker_id)
+            include_hands = (asker_id and self.state == IN_PROGRESS and player.id == asker_id)
             if not include_hands:
                 # Remove the actual cards, but keep the count
                 player_data['hand'] = []
             players_data.append(player_data)
-        
-        current_player = self.get_current_player()
-            
+          
         return {
             'gameId': self.game_id,
             'players': players_data,

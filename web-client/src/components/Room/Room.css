@@ -538,6 +538,12 @@ button:disabled {
   box-shadow: var(--shadow-md);
 }
 
+.disconnected {
+  color: var(--text-error);
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+}
+
 .winner {
   font-size: 1.5em;
   font-weight: 700;

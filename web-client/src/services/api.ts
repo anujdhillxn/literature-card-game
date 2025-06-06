@@ -1,11 +1,10 @@
 // src/services/api.ts
 const API_BASE_URL = "http://localhost:8000/api";
 
-export const createRoom = async (userId: number): Promise<string> => {
+export const createRoom = async (): Promise<string> => {
     const response = await fetch(`${API_BASE_URL}/games/create-room`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId }),
     });
 
     if (!response.ok) {

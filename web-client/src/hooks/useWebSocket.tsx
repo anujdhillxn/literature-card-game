@@ -21,26 +21,26 @@ interface UseWebSocketResult {
  */
 const useWebSocket = (
     roomId: string | null,
-    userInfo: { userId: number | null; username?: string },
+    userInfo: { userToken: number | null; username: string },
     onMessage?: (data: WebSocketMessage) => void
 ): UseWebSocketResult => {
     const [status, setStatus] = useState<WebSocketStatus>('closed');
     const [error, setError] = useState<string | null>(null);
     const wsRef = useRef<WebSocket | null>(null);
-    const { userId, username } = userInfo;
+    const { userToken, username } = userInfo;
     // Connect to WebSocket
     useEffect(() => {
-        console.log(`useWebSocket: roomId=${roomId}, userId=${userId}, username=${username}`);
-        if (!roomId || userId === null || !username) return;
+        console.log(`useWebSocket: roomId=${roomId}, userToken=${userToken}, username=${username}`);
+        if (!roomId || userToken === null || !username) return;
         // Close any existing connection
         if (wsRef.current) {
             wsRef.current.close();
             wsRef.current = null;
         }
 
-        const url = `ws://localhost:8000/ws/room/${roomId}/${userId}/${encodeURIComponent(username)}/`;
+        const url = `ws://localhost:8000/ws/room/${roomId}/${userToken}/${encodeURIComponent(username)}/`;
         setStatus('connecting');
-        console.log(`Opening WebSocket connection to room ${roomId} as user ${userId}`);
+        console.log(`Opening WebSocket connection to room ${roomId} as user ${userToken}`);
 
         const ws = new WebSocket(url);
         wsRef.current = ws;
@@ -83,7 +83,7 @@ const useWebSocket = (
             ws.close();
             wsRef.current = null;
         };
-    }, [roomId, userId, username, onMessage]);
+    }, [roomId, userToken, username, onMessage]);
 
     // Send message method
     const sendMessage = useCallback((data: GameAction) => {

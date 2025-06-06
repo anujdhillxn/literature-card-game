@@ -10,20 +10,20 @@ import { ALL_CARDS, getPlayerName, getPlayerTeam, SET_NAMES } from '../../utils/
 
 interface GameBoardProps {
     roomId: string;
-    userId: number;
+    userId: string;
     roomState: RoomState;
     isMyTurn: boolean;
     errorMessage: string | null;
-    selectedPlayer: number | null;
+    selectedPlayer: string | null;
     selectedCard: CardType | null;
     selectedSet: number | null;
-    currentPlayer?: Player;
-    onSelectPlayer: (playerId: number) => void;
+    currentPlayer: Player;
+    onSelectPlayer: (playerId: string) => void;
     onSelectCard: (card: CardType) => void;
     onSelectSet: (setId: number) => void;
     onAskCard: () => void;
     onClaimSet: () => void;
-    onPassTurn: (teammateId: number) => void;
+    onPassTurn: (teammateId: string) => void;
     onLeaveRoom: () => void;
     onCancelAction: () => void;
 }
@@ -47,6 +47,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
     onLeaveRoom,
     onCancelAction
 }) => {
+    console.log(roomState);
     return (
         <div className="game-active">
             {errorMessage && <ErrorMessage message={errorMessage} />}
@@ -69,7 +70,6 @@ const GameBoard: React.FC<GameBoardProps> = ({
                     lastAsk={roomState.game.lastAsk}
                 />
             </div>
-
             <div className="game-board">
                 <div className="teams-panel">
                     <PlayerList
@@ -81,6 +81,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
                         isPlaying={true}
                         currentUserTeam={currentPlayer?.team}
                         onSelectPlayer={onSelectPlayer}
+                        roomState={roomState}
                     />
 
                     <PlayerList
@@ -92,6 +93,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
                         isPlaying={true}
                         currentUserTeam={currentPlayer?.team}
                         onSelectPlayer={onSelectPlayer}
+                        roomState={roomState}
                     />
                 </div>
                 <SetGrid

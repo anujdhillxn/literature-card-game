@@ -5,17 +5,16 @@ import ErrorMessage from './ErrorMessage';
 
 type LobbyProps = {
     username: string;
-    userId: number;
     onRoomJoin: (roomId: string) => void;
 };
 
-const Lobby: React.FC<LobbyProps> = ({ username, userId, onRoomJoin }) => {
+const Lobby: React.FC<LobbyProps> = ({ username, onRoomJoin }) => {
     const [roomToJoin, setRoomToJoin] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
 
     const handleCreateRoom = async () => {
         try {
-            const roomId = await createRoom(userId);
+            const roomId = await createRoom();
             onRoomJoin(roomId);
         } catch (e: any) {
             setError(e.message);
@@ -34,7 +33,7 @@ const Lobby: React.FC<LobbyProps> = ({ username, userId, onRoomJoin }) => {
         <div style={{ marginTop: 20 }}>
             <ErrorMessage message={error} />
             <p>
-                Logged in as: <b>{username}</b> (ID: <b>{userId}</b>)
+                Logged in as: <b>{username}</b>)
             </p>
             <button onClick={handleCreateRoom}>Create Room</button>
 

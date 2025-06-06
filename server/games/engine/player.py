@@ -5,7 +5,7 @@ Player implementation for Literature card game.
 class Player:
     """Represents a player in the Literature card game."""
 
-    def __init__(self, id, name, team):
+    def __init__(self, id, name, token, team):
         """
         Initialize a player.
         
@@ -18,6 +18,7 @@ class Player:
         self.name = name
         self.team = team
         self.hand = set()  # Cards the player currently holds
+        self.token = token
         
     def add_card(self, card):
         """

@@ -1,18 +1,19 @@
 // src/components/Room/PlayerList.tsx
 import React from 'react';
-import { type Player } from '../../types';
+import { type Player, type RoomState } from '../../types';
 
 interface PlayerListProps {
     team: 1 | 2;
     players: Player[];
-    userId: number;
-    currentPlayerId: number | null;
-    selectedPlayerId: number | null;
+    userId: string;
+    currentPlayerId: string | null;
+    selectedPlayerId: string | null;
     isPlaying: boolean;
     currentUserTeam: 1 | 2 | undefined;
-    onSelectPlayer: (playerId: number) => void;
+    onSelectPlayer: (playerId: string) => void;
     isHost?: boolean;
-    onMakeHost?: (playerId: number) => void;
+    onMakeHost?: (playerId: string) => void;
+    roomState?: RoomState
 }
 
 const PlayerList: React.FC<PlayerListProps> = ({
@@ -25,7 +26,8 @@ const PlayerList: React.FC<PlayerListProps> = ({
     currentUserTeam,
     onSelectPlayer,
     isHost,
-    onMakeHost
+    onMakeHost,
+    roomState
 }) => {
     const teamPlayers = players.filter(p => p.team === team);
 
@@ -47,11 +49,11 @@ const PlayerList: React.FC<PlayerListProps> = ({
                     const isCurrentTurn = p.id === currentPlayerId;
                     const isSelected = p.id === selectedPlayerId;
                     const canBeSelected = !isCurrentUser && p.team !== currentUserTeam && isPlaying;
-
+                    const disconnected = roomState && roomState.players.findIndex(player => player.id === p.id) === -1;
                     return (
                         <li
                             key={p.id}
-                            className={`player ${isSelected ? 'selected' : ''} ${isCurrentUser ? 'you' : ''} ${isCurrentTurn ? 'current-turn' : ''}`}
+                            className={`player ${isSelected ? 'selected' : ''} ${isCurrentUser ? 'you' : ''} ${isCurrentTurn ? 'current-turn' : ''} ${disconnected ? 'disconnected' : ''}`}
                             onClick={() => canBeSelected ? onSelectPlayer(p.id) : null}
                         >
                             {p.name} {isPlaying && `(${p.card_count} cards)`}

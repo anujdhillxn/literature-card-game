@@ -3,41 +3,35 @@ import type { Card } from "./game";
 
 export type AddPlayerAction = {
     type: "add_player";
-    actor_id: number;
     room_id: string;
 };
 
 export type ChangeTeamAction = {
     type: "change_team";
-    actor_id: number;
-    player_id: number;
+    player_id: string;
     new_team: 1 | 2;
     room_id: string;
 };
 
 export type StartGameAction = {
     type: "start_game";
-    actor_id: number;
     room_id: string;
 };
 
 export type RemovePlayerAction = {
     type: "remove_player";
-    actor_id: number;
-    player_id: number;
+    player_id: string;
     room_id: string;
 };
 
 export type ChangeHostAction = {
     type: "change_host";
-    actor_id: number;
-    new_host_id: number;
+    new_host_id: string;
     room_id: string;
 };
 
 export type MakeMoveAction = {
     type: "make_move";
-    actor_id: number;
     room_id: string;
     move_data: AskCardMove | ClaimSetMove | PassTurnMove;
 };
@@ -45,7 +39,7 @@ export type MakeMoveAction = {
 // Game move types
 export type AskCardMove = {
     move_type: "ask_card";
-    asked_player_id: number;
+    asked_player_id: string;
     card: Card;
 };
 
@@ -56,7 +50,7 @@ export type ClaimSetMove = {
 
 export type PassTurnMove = {
     move_type: "pass_turn";
-    teammate_id: number;
+    teammate_id: string;
 };
 
 export type GameAction =
