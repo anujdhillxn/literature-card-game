@@ -1,13 +1,13 @@
 // src/hooks/useWebSocket.tsx
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { WebSocketMessage, RoomAction } from '../types';
+import type { WebSocketMessage, RoomActionPayload } from '../types';
 
 type WebSocketStatus = 'connecting' | 'open' | 'closed' | 'error';
 
 interface UseWebSocketResult {
     status: WebSocketStatus;
     error: string | null;
-    sendMessage: (data: RoomAction) => void;
+    sendMessage: (data: RoomActionPayload) => void;
     closeConnection: () => void;
 }
 
@@ -86,7 +86,7 @@ const useWebSocket = (
     }, [roomId, userToken, username, onMessage]);
 
     // Send message method
-    const sendMessage = useCallback((data: RoomAction) => {
+    const sendMessage = useCallback((data: RoomActionPayload) => {
         if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
             setError('WebSocket is not connected');
             return;

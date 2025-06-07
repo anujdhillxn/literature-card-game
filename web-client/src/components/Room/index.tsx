@@ -4,20 +4,19 @@ import useWebSocket from '../../hooks/useWebSocket';
 import type {
     RoomState,
     WebSocketMessage,
-    ChangeTeamAction,
-    StartGameAction,
-    RemovePlayerAction,
-    ChangeHostAction,
-    MakeMoveAction,
     AskCardMove,
     ClaimSetMove,
-    PassTurnMove
+    PassTurnMove,
+    RoomActions,
+    ChangeTeamActionPayload,
+    StartGameActionPayload,
+    RemovePlayerActionPayload,
+    ChangeHostActionPayload,
+    MakeMoveActionPayload
 } from '../../types';
-import GameBoard from './GameBoard';
-import GameOver from './GameOver';
-import PreGame from './PreGame';
-import './Room.css';
 import ErrorMessage from '../ErrorMessage';
+import './Room.css';
+import Game from '../Games';
 interface RoomProps {
     roomId: string;
     userToken: number;
@@ -26,7 +25,6 @@ interface RoomProps {
 }
 
 const Room: React.FC<RoomProps> = ({ roomId, userToken, username, onLeaveRoom }) => {
-    // State
     const [roomState, setRoomState] = useState<RoomState | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -48,22 +46,16 @@ const Room: React.FC<RoomProps> = ({ roomId, userToken, username, onLeaveRoom })
     const displayError = error || errorMessage;
 
     const userId = roomState?.receiverId;
-    const isHost = roomState?.hostId === userId;
-    const gameStarted = roomState?.game?.state === 'in_progress';
-    const gameEnded = roomState?.game?.state === 'ended';
 
-    useEffect((): (() => void) => {
+    useEffect(() => {
         if (errorMessage) {
             const timer = setTimeout(() => setErrorMessage(null), 5000);
             return () => clearTimeout(timer);
         }
-        return () => { }; // Return empty function when no timer is set
     }, [errorMessage]);
 
-    // Action handlers
-
     const handleStartGame = (): void => {
-        const action: StartGameAction = {
+        const action: StartGameActionPayload = {
             type: 'start_game',
             room_id: roomId
         };
@@ -71,7 +63,7 @@ const Room: React.FC<RoomProps> = ({ roomId, userToken, username, onLeaveRoom })
     };
 
     const handleLeaveRoom = (): void => {
-        const action: RemovePlayerAction = {
+        const action: RemovePlayerActionPayload = {
             type: 'remove_player',
             player_id: userId!,
             room_id: roomId
@@ -83,7 +75,7 @@ const Room: React.FC<RoomProps> = ({ roomId, userToken, username, onLeaveRoom })
     };
 
     const handleChangeHost = (newHostId: string): void => {
-        const action: ChangeHostAction = {
+        const action: ChangeHostActionPayload = {
             type: 'change_host',
             new_host_id: newHostId,
             room_id: roomId
@@ -92,7 +84,7 @@ const Room: React.FC<RoomProps> = ({ roomId, userToken, username, onLeaveRoom })
     };
 
     const handleChangeTeam = (newTeam: 1 | 2): void => {
-        const action: ChangeTeamAction = {
+        const action: ChangeTeamActionPayload = {
             type: 'change_team',
             player_id: userId!,
             new_team: newTeam,
@@ -102,65 +94,31 @@ const Room: React.FC<RoomProps> = ({ roomId, userToken, username, onLeaveRoom })
     };
 
     const handleGameAction = (moveData: AskCardMove | ClaimSetMove | PassTurnMove): void => {
-        const action: MakeMoveAction = {
+        const action: MakeMoveActionPayload = {
             type: 'make_move',
             room_id: roomId,
             move_data: moveData
         };
         sendMessage(action);
     }
-    // Render different views based on game state
+
+    const roomActions: RoomActions = {
+        onStartGame: handleStartGame,
+        onLeaveRoom: handleLeaveRoom,
+        onChangeHost: handleChangeHost,
+        onChangeTeam: handleChangeTeam,
+        onGameAction: handleGameAction
+    };
+
     if (status === 'connecting' || !roomState) {
-        return <div className="loading">Connecting to room {roomId}...</div>;
-    }
-
-
-    const currentState = () => {
-        if (!userId) {
-            return <div className="error">Error: User ID not found in room state.</div>;
-        }
-        if (gameEnded) {
-            return (
-                <GameOver
-                    roomId={roomId}
-                    roomState={roomState}
-                    errorMessage={displayError}
-                    onLeaveRoom={handleLeaveRoom}
-                />
-            );
-        }
-        if (gameStarted) {
-            return (
-                <GameBoard
-                    roomId={roomId}
-                    userId={userId}
-                    roomState={roomState}
-                    errorMessage={displayError}
-                    onLeaveRoom={handleLeaveRoom}
-                    onGameAction={handleGameAction}
-                />
-            );
-        }
-        return (
-            <PreGame
-                roomId={roomId}
-                userId={userId}
-                roomState={roomState}
-                connectionStatus={status}
-                isHost={!!isHost}
-                errorMessage={displayError}
-                onChangeTeam={handleChangeTeam}
-                onChangeHost={handleChangeHost}
-                onStartGame={handleStartGame}
-            />
-        );
+        return <><div className="loading">Connecting to room {roomId}...</div>        <div><button onClick={onLeaveRoom} className="leave-btn">Leave Room</button></div></>;
     }
 
     return <div className='room'>
         {errorMessage && <ErrorMessage message={errorMessage} />}
         <h2>Room: {roomId}</h2>
-        <button onClick={onLeaveRoom} className="leave-btn">Leave Room</button>
-        {currentState()}
+        <div><button onClick={onLeaveRoom} className="leave-btn">Leave Room</button></div>
+        <Game connectionStatus={status} roomActions={roomActions} roomState={roomState} errorMessage={displayError} />
     </div>
 };
 

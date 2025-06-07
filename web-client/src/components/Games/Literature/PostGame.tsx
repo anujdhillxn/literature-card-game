@@ -1,26 +1,20 @@
 // src/components/Room/GameOver.tsx
 import React from 'react';
-import { type RoomState } from '../../types';
-import ErrorMessage from '../ErrorMessage';
-import { SET_NAMES } from '../../utils/cardHelpers';
+import { type RoomState } from '../../../types';
+import { SET_NAMES } from '../../../utils/cardHelpers';
 
-interface GameOverProps {
-    roomId: string;
+interface PostGameProps {
     roomState: RoomState;
-    errorMessage: string | null;
     onLeaveRoom: () => void;
 }
 
-const GameOver: React.FC<GameOverProps> = ({
-    roomId,
+const PostGame: React.FC<PostGameProps> = ({
     roomState,
-    errorMessage,
     onLeaveRoom
 }) => {
     return (
         <div className="game-ended">
-            {errorMessage && <ErrorMessage message={errorMessage} />}
-            <h2>Game Over - Room: {roomId}</h2>
+            <h2>Game Over - Room: {roomState.room_id}</h2>
 
             <div className="game-result">
                 <h3>Final Score</h3>
@@ -62,4 +56,4 @@ const GameOver: React.FC<GameOverProps> = ({
     );
 };
 
-export default GameOver;
+export default PostGame;

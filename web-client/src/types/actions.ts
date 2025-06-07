@@ -1,36 +1,36 @@
 // src/types/actions.ts
 import type { Card } from "./game";
 
-export type AddPlayerAction = {
+export type AddPlayerActionPayload = {
     type: "add_player";
     room_id: string;
 };
 
-export type ChangeTeamAction = {
+export type ChangeTeamActionPayload = {
     type: "change_team";
     player_id: string;
     new_team: 1 | 2;
     room_id: string;
 };
 
-export type StartGameAction = {
+export type StartGameActionPayload = {
     type: "start_game";
     room_id: string;
 };
 
-export type RemovePlayerAction = {
+export type RemovePlayerActionPayload = {
     type: "remove_player";
     player_id: string;
     room_id: string;
 };
 
-export type ChangeHostAction = {
+export type ChangeHostActionPayload = {
     type: "change_host";
     new_host_id: string;
     room_id: string;
 };
 
-export type MakeMoveAction = {
+export type MakeMoveActionPayload = {
     type: "make_move";
     room_id: string;
     move_data: AskCardMove | ClaimSetMove | PassTurnMove;
@@ -53,10 +53,18 @@ export type PassTurnMove = {
     teammate_id: string;
 };
 
-export type RoomAction =
-    | AddPlayerAction
-    | ChangeTeamAction
-    | StartGameAction
-    | RemovePlayerAction
-    | ChangeHostAction
-    | MakeMoveAction;
+export type RoomActionPayload =
+    | AddPlayerActionPayload
+    | ChangeTeamActionPayload
+    | StartGameActionPayload
+    | RemovePlayerActionPayload
+    | ChangeHostActionPayload
+    | MakeMoveActionPayload;
+
+export type RoomActions = {
+    onStartGame: () => void;
+    onLeaveRoom: () => void;
+    onChangeHost: (newHostId: string) => void;
+    onChangeTeam: (newTeam: 2 | 1) => void;
+    onGameAction: (moveData: AskCardMove | ClaimSetMove | PassTurnMove) => void;
+};

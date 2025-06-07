@@ -1,10 +1,8 @@
 import React from 'react';
-import type { RoomState } from '../../types';
-import PlayerList from './PlayerList';
+import type { RoomState } from '../../../types';
+import PlayerList from '../../Room/PlayerList';
 
 interface PreGameProps {
-    roomId: string;
-    userId: string;
     roomState: RoomState;
     connectionStatus: string;
     isHost: boolean;
@@ -15,13 +13,13 @@ interface PreGameProps {
 }
 
 const PreGame: React.FC<PreGameProps> = ({
-    userId,
     roomState,
     isHost,
     onChangeTeam,
     onChangeHost,
     onStartGame,
 }) => {
+    const userId = roomState.receiverId;
     const currentPlayer = roomState.game.players.find(p => p.id === userId);
     const currentTeam = currentPlayer ? currentPlayer.team : undefined;
     const team1PlayerCount = roomState.players.filter(p => p.team === 1).length;

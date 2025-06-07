@@ -19,6 +19,7 @@ export type Ask = {
 
 export type GameState = {
     gameId: string;
+    type: string;
     players: Player[];
     currentPlayerId: string | null;
     claimedSets: Record<number, 1 | 2>;

@@ -1,26 +1,24 @@
 // src/components/Room/GameBoard.tsx
 import React, { useState } from 'react';
-import { type AskCardMove, type Card as CardType, type ClaimSetMove, type PassTurnMove, type RoomState } from '../../types';
-import PlayerList from './PlayerList';
-import SetGrid from './SetGrid';
-import Card from './Card';
-import LastAsk from './LastAsk';
-import { ALL_CARDS, getPlayerName, getPlayerTeam, SET_NAMES } from '../../utils/cardHelpers';
+import { type AskCardMove, type Card as CardType, type ClaimSetMove, type PassTurnMove, type RoomState } from '../../../types';
+import PlayerList from '../../Room/PlayerList';
+import SetGrid from '../../Room/SetGrid';
+import Card from '../../Room/Card';
+import LastAsk from '../../Room/LastAsk';
+import { ALL_CARDS, getPlayerName, getPlayerTeam, SET_NAMES } from '../../../utils/cardHelpers';
 
-interface GameBoardProps {
-    roomId: string;
-    userId: string;
+interface InGameProps {
     roomState: RoomState;
     errorMessage: string | null;
     onLeaveRoom: () => void;
     onGameAction: (moveData: AskCardMove | ClaimSetMove | PassTurnMove) => void;
 }
 
-const GameBoard: React.FC<GameBoardProps> = ({
-    userId,
+const InGame: React.FC<InGameProps> = ({
     roomState,
     onGameAction
 }) => {
+    const userId = roomState.receiverId;
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
     const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
     const [selectedSet, setSelectedSet] = useState<number | null>(null);
@@ -201,4 +199,4 @@ const GameBoard: React.FC<GameBoardProps> = ({
     );
 };
 
-export default GameBoard;
+export default InGame;
