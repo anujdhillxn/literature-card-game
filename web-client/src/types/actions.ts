@@ -53,7 +53,7 @@ export type PassTurnMove = {
     teammate_id: string;
 };
 
-export type GameAction =
+export type RoomAction =
     | AddPlayerAction
     | ChangeTeamAction
     | StartGameAction

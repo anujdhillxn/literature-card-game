@@ -10,32 +10,37 @@ function App() {
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Get room from URL (safe to keep in URL)
     const urlParams = new URLSearchParams(window.location.search);
     const roomId = urlParams.get('room');
-    const token = urlParams.get('token');
-    const name = urlParams.get('username');
     if (roomId) {
       setCurrentRoomId(roomId);
     }
-    if (token) {
-      const parsedToken = parseInt(token, 10);
+
+    // Get user data from localStorage (more private)
+    const savedUsername = localStorage.getItem('username');
+    const savedToken = localStorage.getItem('authUserToken') || localStorage.getItem('anonUserToken');
+
+    if (savedUsername) {
+      setUsername(savedUsername);
+    }
+
+    if (savedToken) {
+      const parsedToken = parseInt(savedToken, 10);
       if (!isNaN(parsedToken)) {
         setUserToken(parsedToken);
       }
     }
-    if (name) {
-      setUsername(name);
-    }
   }, []);
 
   const handleLogin = (username: string, userToken: number) => {
+    // Save to state
     setUsername(username);
     setUserToken(userToken);
-    const url = new URL(window.location.href);
-    url.searchParams.set('token', userToken?.toString() || '');
-    url.searchParams.set('username', username);
-    window.history.pushState({}, '', url);
 
+    // Save to localStorage
+    // localStorage.setItem('username', username);
+    // localStorage.setItem('anonUserToken', userToken.toString());
   };
 
   const handleRoomJoin = (roomId: string) => {

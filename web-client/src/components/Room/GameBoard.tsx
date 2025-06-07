@@ -1,6 +1,6 @@
 // src/components/Room/GameBoard.tsx
-import React from 'react';
-import { type Card as CardType, type Player, type RoomState } from '../../types';
+import React, { useState } from 'react';
+import { type AskCardMove, type Card as CardType, type ClaimSetMove, type PassTurnMove, type RoomState } from '../../types';
 import PlayerList from './PlayerList';
 import SetGrid from './SetGrid';
 import Card from './Card';
@@ -12,42 +12,62 @@ interface GameBoardProps {
     roomId: string;
     userId: string;
     roomState: RoomState;
-    isMyTurn: boolean;
     errorMessage: string | null;
-    selectedPlayer: string | null;
-    selectedCard: CardType | null;
-    selectedSet: number | null;
-    currentPlayer: Player;
-    onSelectPlayer: (playerId: string) => void;
-    onSelectCard: (card: CardType) => void;
-    onSelectSet: (setId: number) => void;
-    onAskCard: () => void;
-    onClaimSet: () => void;
-    onPassTurn: (teammateId: string) => void;
     onLeaveRoom: () => void;
-    onCancelAction: () => void;
+    onGameAction: (moveData: AskCardMove | ClaimSetMove | PassTurnMove) => void;
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({
     roomId,
     userId,
     roomState,
-    isMyTurn,
     errorMessage,
-    selectedPlayer,
-    selectedCard,
-    selectedSet,
-    currentPlayer,
-    onSelectPlayer,
-    onSelectCard,
-    onSelectSet,
-    onAskCard,
-    onClaimSet,
-    onPassTurn,
     onLeaveRoom,
-    onCancelAction
+    onGameAction
 }) => {
-    console.log(roomState);
+    const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+    const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
+    const [selectedSet, setSelectedSet] = useState<number | null>(null);
+
+    const onAskCard = (): void => {
+        if (!selectedPlayer || !selectedCard) return;
+
+        const moveData: AskCardMove = {
+            move_type: 'ask_card',
+            asked_player_id: selectedPlayer,
+            card: selectedCard
+        };
+        onGameAction(moveData);
+        setSelectedPlayer(null);
+        setSelectedCard(null);
+    };
+
+    const onClaimSet = (): void => {
+        if (!selectedSet) return;
+
+        const moveData: ClaimSetMove = {
+            move_type: 'claim_set',
+            set_number: selectedSet
+        };
+        onGameAction(moveData);
+        setSelectedSet(null);
+    };
+
+    const onPassTurn = (teammateId: string): void => {
+        const moveData: PassTurnMove = {
+            move_type: 'pass_turn',
+            teammate_id: teammateId
+        };
+        onGameAction(moveData);
+    }
+
+    const onCancelAction = (): void => {
+        setSelectedPlayer(null);
+        setSelectedCard(null);
+        setSelectedSet(null);
+    };
+    const currentPlayer = roomState?.game?.players?.find(p => p.id === userId);
+    const isMyTurn = currentPlayer?.id === userId;
     return (
         <div className="game-active">
             {errorMessage && <ErrorMessage message={errorMessage} />}
@@ -80,7 +100,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
                         selectedPlayerId={selectedPlayer}
                         isPlaying={true}
                         currentUserTeam={currentPlayer?.team}
-                        onSelectPlayer={onSelectPlayer}
+                        onSelectPlayer={setSelectedPlayer}
                         roomState={roomState}
                     />
 
@@ -92,7 +112,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
                         selectedPlayerId={selectedPlayer}
                         isPlaying={true}
                         currentUserTeam={currentPlayer?.team}
-                        onSelectPlayer={onSelectPlayer}
+                        onSelectPlayer={setSelectedPlayer}
                         roomState={roomState}
                     />
                 </div>
@@ -100,7 +120,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
                     claimedSets={roomState.game.claimedSets}
                     canClaimSets={isMyTurn}
                     selectedSet={selectedSet}
-                    onSelectSet={onSelectSet}
+                    onSelectSet={setSelectedSet}
                     onClaimSet={onClaimSet}
                 />
 
@@ -158,7 +178,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
                                                     <Card
                                                         card={card}
                                                         isSelected={selectedCard === card}
-                                                        onSelect={onSelectCard}
+                                                        onSelect={setSelectedCard}
                                                         disabled={currentPlayer?.hand?.includes(card)}
                                                     />
                                                 </div>

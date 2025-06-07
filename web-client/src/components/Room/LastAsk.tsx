@@ -3,11 +3,11 @@ import React from 'react';
 import { type Ask } from '../../types';
 import Card from './Card';
 
-interface LastActionProps {
+interface LastAskProps {
     lastAsk: Ask | null;
 }
 
-const LastAction: React.FC<LastActionProps> = ({ lastAsk }) => {
+const LastAsk: React.FC<LastAskProps> = ({ lastAsk }) => {
     if (!lastAsk) return <div className="action">No cards have been asked yet.</div>;
 
     return <div className="action">
@@ -17,4 +17,4 @@ const LastAction: React.FC<LastActionProps> = ({ lastAsk }) => {
 
 };
 
-export default LastAction;
+export default LastAsk;

@@ -51,7 +51,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
             print(f"Error processing message: {e}")
             await self.send(text_data=json.dumps({"error": str(e)}))
 
-    async def room_message(self, action):
+    async def room_message(self):
         """Handle messages sent to the room group."""
         room = room_manager.get_room(self.room_id)
         if room and self.user_token in room.players:
@@ -59,7 +59,6 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 {
                     "success": True,
                     "currentState": room.to_dict(self.user_token),
-                    "lastAction": action.get("action", None),
                 }
             ))
 
@@ -73,12 +72,11 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-    async def update_self(self, action, error):
+    async def update_self(self, error):
         """Send an update to the user about their action."""
         await self.send(text_data=json.dumps(
             {
                 "success": False,
                 "error": error,
-                "failedAction": action,
             }
         ))

@@ -33,7 +33,7 @@ const Lobby: React.FC<LobbyProps> = ({ username, onRoomJoin }) => {
         <div style={{ marginTop: 20 }}>
             <ErrorMessage message={error} />
             <p>
-                Logged in as: <b>{username}</b>)
+                Logged in as: <b>{username}</b>
             </p>
             <button onClick={handleCreateRoom}>Create Room</button>
 

@@ -14,7 +14,6 @@ interface PreGameProps {
     onChangeHost: (hostId: string) => void;
     onStartGame: () => void;
     onLeaveRoom: () => void;
-    currentTeam?: 1 | 2;
 }
 
 const PreGame: React.FC<PreGameProps> = ({
@@ -28,8 +27,9 @@ const PreGame: React.FC<PreGameProps> = ({
     onChangeHost,
     onStartGame,
     onLeaveRoom,
-    currentTeam
 }) => {
+    const currentPlayer = roomState.game.players.find(p => p.id === userId);
+    const currentTeam = currentPlayer ? currentPlayer.team : undefined;
     const team1PlayerCount = roomState.players.filter(p => p.team === 1).length;
     const team2PlayerCount = roomState.players.filter(p => p.team === 2).length;
 

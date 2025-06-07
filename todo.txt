@@ -1,4 +1,3 @@
-validations in different functions
 better error and game log handling in ui
 add private/public rooms
 room-game inheritance refactor?

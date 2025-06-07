@@ -36,9 +36,14 @@ export type RoomState = {
     receiverId: string;
 };
 
-export type WebSocketMessage = {
-    currentState?: RoomState;
-    lastAction?: any;
-    success?: boolean;
-    error?: string;
+export type WebSocketMessageSuccess = {
+    currentState: RoomState;
+    success: true;
 };
+
+export type WebSocketMessageError = {
+    error: string;
+    success: false;
+};
+
+export type WebSocketMessage = WebSocketMessageSuccess | WebSocketMessageError;

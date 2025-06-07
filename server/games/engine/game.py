@@ -98,7 +98,7 @@ class Game:
             
         if len(players) != 6: raise ValueError("Exactly 6 players required")
         for player in players:
-            self.players.append()
+            self.players.append(player)
         # Randomly select a starting player
         starting_player = random.choice(list(self.players))
         self.current_turn_player_id = starting_player.id

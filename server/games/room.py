@@ -100,6 +100,8 @@ class Room:
             
         if new_team not in (1, 2):
             raise ValueError("Invalid team number")
+        if new_team == player.team:
+            raise ValueError("Player is already in that team")
             
         self.players[player.token].team = new_team
     
