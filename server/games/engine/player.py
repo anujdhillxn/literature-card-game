@@ -1,24 +1,56 @@
 """
-Player implementation for Literature card game.
+Player implementations for Literature card game.
 """
 
 class Player:
-    """Represents a player in the Literature card game."""
+    """Base player class with core identity attributes."""
 
-    def __init__(self, id, name, token, team):
+    def __init__(self, id, name, token):
         """
-        Initialize a player.
+        Initialize a base player.
         
         Args:
             id: Unique identifier for the player
             name (str): Player's display name
-            team (int): Team number (1 or 2)
+            token: Authentication token for the player
         """
         self.id = id
         self.name = name
+        self.token = token
+    
+    def to_dict(self):
+        """
+        Return a dictionary representation of the player.
+        
+        Returns:
+            dict: Player data for serialization
+        """
+        return {
+            'id': self.id,
+            'name': self.name,
+        }
+    
+    def __str__(self):
+        """String representation of the player."""
+        return f"Player {self.name}"
+
+
+class LiteraturePlayer(Player):
+    """Specialized player for the Literature card game with game-specific attributes."""
+
+    def __init__(self, id, name, token, team):
+        """
+        Initialize a Literature player.
+        
+        Args:
+            id: Unique identifier for the player
+            name (str): Player's display name
+            token: Authentication token for the player
+            team (int): Team number (1 or 2)
+        """
+        super().__init__(id, name, token)
         self.team = team
         self.hand = set()  # Cards the player currently holds
-        self.token = token
         
     def add_card(self, card):
         """
@@ -63,14 +95,13 @@ class Player:
         Returns:
             dict: Player data for serialization
         """
-    
-        return {
-            'id': self.id,
-            'name': self.name,
+        base_dict = super().to_dict()
+        base_dict.update({
             'team': self.team,
             'hand': list(self.hand),
             'card_count': len(self.hand)
-        }
+        })
+        return base_dict
     
     def __str__(self):
         """String representation of the player."""

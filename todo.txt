@@ -1,6 +1,7 @@
+inheritance refactor
 better error and game log handling in ui
 add private/public rooms
-room-game inheritance refactor?
+-----------------
 authentication
 allow room creation only for authenticated users
 elo

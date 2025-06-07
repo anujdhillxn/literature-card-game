@@ -1,6 +1,6 @@
 // src/components/Room/PlayerList.tsx
 import React from 'react';
-import { type Player, type RoomState } from '../../types';
+import { type Player, type RoomState } from '../../../types';
 
 interface PlayerListProps {
     team: 1 | 2;
@@ -13,6 +13,7 @@ interface PlayerListProps {
     onSelectPlayer: (playerId: string) => void;
     isHost?: boolean;
     onMakeHost?: (playerId: string) => void;
+    hostId?: string;
     roomState?: RoomState
 }
 
@@ -27,10 +28,10 @@ const PlayerList: React.FC<PlayerListProps> = ({
     onSelectPlayer,
     isHost,
     onMakeHost,
-    roomState
+    roomState,
 }) => {
     const teamPlayers = players.filter(p => p.team === team);
-
+    const hostId = roomState?.hostId || '';
     if (!teamPlayers.length) {
         return (
             <div className={`team-container team${team}`}>
@@ -49,7 +50,7 @@ const PlayerList: React.FC<PlayerListProps> = ({
                     const isCurrentTurn = p.id === currentPlayerId;
                     const isSelected = p.id === selectedPlayerId;
                     const canBeSelected = !isCurrentUser && p.team !== currentUserTeam && isPlaying;
-                    const disconnected = roomState && roomState.players.findIndex(player => player.id === p.id) === -1;
+                    const disconnected = !(roomState?.connectedPlayers.includes(p.id));
                     return (
                         <li
                             key={p.id}
@@ -58,7 +59,7 @@ const PlayerList: React.FC<PlayerListProps> = ({
                         >
                             {p.name} {isPlaying && `(${p.card_count} cards)`}
                             {isCurrentUser && <span className="you-badge">You</span>}
-                            {p.is_host && <span className="host-badge">Host</span>}
+                            {p.id === hostId && <span className="host-badge">Host</span>}
                             {isCurrentTurn && <span className="current-turn-badge">← Current Turn</span>}
                             {isHost && !isCurrentUser && !isPlaying && (
                                 <button className="make-host-btn" onClick={() => onMakeHost?.(p.id)}>

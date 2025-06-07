@@ -1,17 +1,16 @@
 // src/components/Room/GameBoard.tsx
 import React, { useState } from 'react';
-import { type AskCardMove, type Card as CardType, type ClaimSetMove, type PassTurnMove, type RoomState } from '../../../types';
-import PlayerList from '../../Room/PlayerList';
-import SetGrid from '../../Room/SetGrid';
-import Card from '../../Room/Card';
-import LastAsk from '../../Room/LastAsk';
+import { type AskCardMove, type Card as CardType, type ClaimSetMove, type InGameAction, type PassTurnMove, type RoomState } from '../../../types';
+import PlayerList from './PlayerList';
+import SetGrid from './SetGrid';
+import Card from './Card';
+import LastAsk from './LastAsk';
 import { ALL_CARDS, getPlayerName, getPlayerTeam, SET_NAMES } from '../../../utils/cardHelpers';
 
 interface InGameProps {
     roomState: RoomState;
-    errorMessage: string | null;
     onLeaveRoom: () => void;
-    onGameAction: (moveData: AskCardMove | ClaimSetMove | PassTurnMove) => void;
+    onGameAction: (action: InGameAction) => void;
 }
 
 const InGame: React.FC<InGameProps> = ({
@@ -27,7 +26,7 @@ const InGame: React.FC<InGameProps> = ({
         if (!selectedPlayer || !selectedCard) return;
 
         const moveData: AskCardMove = {
-            move_type: 'ask_card',
+            type: 'ask_card',
             asked_player_id: selectedPlayer,
             card: selectedCard
         };
@@ -40,7 +39,7 @@ const InGame: React.FC<InGameProps> = ({
         if (!selectedSet) return;
 
         const moveData: ClaimSetMove = {
-            move_type: 'claim_set',
+            type: 'claim_set',
             set_number: selectedSet
         };
         onGameAction(moveData);
@@ -49,7 +48,7 @@ const InGame: React.FC<InGameProps> = ({
 
     const onPassTurn = (teammateId: string): void => {
         const moveData: PassTurnMove = {
-            move_type: 'pass_turn',
+            type: 'pass_turn',
             teammate_id: teammateId
         };
         onGameAction(moveData);
@@ -60,8 +59,9 @@ const InGame: React.FC<InGameProps> = ({
         setSelectedCard(null);
         setSelectedSet(null);
     };
-    const currentPlayer = roomState?.game?.players?.find(p => p.id === userId);
-    const isMyTurn = currentPlayer?.id === userId;
+    const currentPlayer = roomState.game.players.find(p => p.id === userId);
+    const isMyTurn = currentPlayer?.id === roomState.game.currentPlayerId;
+    console.log(roomState);
     return (
         <div className="game-active">
             <div className="game-status">
@@ -79,6 +79,7 @@ const InGame: React.FC<InGameProps> = ({
             <div className="last-action">
                 <LastAsk
                     lastAsk={roomState.game.lastAsk}
+                    players={roomState.game.players}
                 />
             </div>
             <div className="game-board">

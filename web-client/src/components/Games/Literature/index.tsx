@@ -6,7 +6,6 @@ import type { GameProps } from '..';
 
 const Game = (props: GameProps): JSX.Element => {
     const userId = props.roomState.receiverId;
-    const isHost = props.roomState.hostId === userId;
     const gameStarted = props.roomState.game.state === 'in_progress';
     const gameEnded = props.roomState.game.state === 'ended';
     if (!userId) {
@@ -24,19 +23,15 @@ const Game = (props: GameProps): JSX.Element => {
         return (
             <InGame
                 roomState={props.roomState}
-                errorMessage={props.errorMessage}
                 onLeaveRoom={props.roomActions.onLeaveRoom}
-                onGameAction={props.roomActions.onGameAction}
+                onGameAction={props.roomActions.onInGameAction}
             />
         );
     }
     return (
         <PreGame
             roomState={props.roomState}
-            connectionStatus={props.connectionStatus}
-            isHost={!!isHost}
-            errorMessage={props.errorMessage}
-            onChangeTeam={props.roomActions.onChangeTeam}
+            onGameAction={props.roomActions.onPreGameAction}
             onChangeHost={props.roomActions.onChangeHost}
             onStartGame={props.roomActions.onStartGame}
         />

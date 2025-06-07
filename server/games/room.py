@@ -6,13 +6,13 @@ Manages a lobby where players can join before the game starts.
 import random
 import string
 import uuid
-from .engine.game import NOT_STARTED, Game
+from .engine.game import IN_PROGRESS, NOT_STARTED, Game
 from .engine.player import Player
 
 class Room:
     """Represents a game room where players can join before starting a game."""
     
-    def __init__(self, room_id=None):
+    def __init__(self, game_type = 'literature', room_id=None):
         """
         Initialize a new room.
         
@@ -22,13 +22,22 @@ class Room:
             room_id (str, optional): Room identifier. If None, one will be generated.
         """
         self.room_id = room_id or self._generate_room_id()
-        self.players = {}  # token -> Player object
-        self.game = Game(self.room_id)
+        self.game_type = game_type
+        print(game_type, self.game_type)
+        self.connected_players = {}  # token -> Player object
+        self.game = self.create_game_instance()
         self.host_token = None
     
     def _generate_room_id(self, length=6):
         """Generate a random room ID."""
         return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
+    
+    def create_game_instance(self):
+        """Create a new game instance based on the game type."""
+        if self.game_type == 'literature':
+            return Game(self.room_id)
+        else:
+            raise ValueError(f"Unsupported game type: {self.game_type}")
     
     def add_player(self, player_name, player_token):
         """
@@ -43,25 +52,21 @@ class Room:
         Returns:
             Player: The added player
         """ 
-        if len(self.players) >= 6:
-            raise ValueError("Room is full")
-            
-        if player_token in self.players:
+        if player_token in self.connected_players:
             raise ValueError("Player already in room")
         
         if not player_name:
             raise ValueError("Player name cannot be empty")
-        
         if self.game.state == NOT_STARTED:
-            player_id = uuid.uuid4().hex 
-            player = Player(player_id, player_name, player_token, team=1 if len(self.players) % 2 == 0 else 2)
-            if not self.host_token:
-                self.host_token = player_token
+            player_id = str(uuid.uuid4())
+            player = self.game.add_player(player_id, player_name, player_token)
         else:
             player = self.game.get_player_by_token(player_token)
             if not player:
                 raise ValueError("Game has already started, cannot add new players")
-        self.players[player_token] = player
+        self.connected_players[player_token] = player
+        if not self.host_token:
+            self.host_token = player_token
     
     def remove_player(self, remove_requester, player_id):
         """
@@ -78,32 +83,12 @@ class Room:
         if remove_requester.id != player_id and not self.is_host(remove_requester):
             raise ValueError("Only the host or the player themselves can be removed")
         
-        del self.players[player.token]
-        if self.players and self.is_host(player):
-            self.host_token = next(iter(self.players.keys()))
-    
-    def change_team(self, change_requester, player_id, new_team):
-        """
-        Move a player to a different team.
-        
-        Args:
-            player_id: ID of player to move
-            new_team (int): Team to move to (1 or 2)
-            
-        Raises:
-            ValueError: If the player doesn't exist or the team is invalid/full
-        """
-        change_requester = self.get_player_by_token(change_requester.token)
-        player = self.get_player(player_id)
-        if change_requester.id != player_id and not self.is_host(change_requester):
-            raise ValueError("Only the host or the player themselves can change teams")
-            
-        if new_team not in (1, 2):
-            raise ValueError("Invalid team number")
-        if new_team == player.team:
-            raise ValueError("Player is already in that team")
-            
-        self.players[player.token].team = new_team
+        del self.connected_players[player.token]
+        if self.connected_players and self.is_host(player):
+            self.host_token = next(iter(self.connected_players.keys()))
+
+        if self.game.state == NOT_STARTED:
+            self.game.remove_player(player.id)
     
     def start_game(self, start_requester):
         """
@@ -115,7 +100,7 @@ class Room:
         """
         if self.host_token != start_requester.token:
             raise ValueError("Only the host can start the game")
-        self.game.start_game(self.players.values())
+        self.game.start_game()
     
     def change_host(self, change_requester, new_host_id):
         """
@@ -147,14 +132,11 @@ class Room:
                 raise ValueError("Player name is required")
             self.add_player(player_name, action_token)
             actor = self.get_player_by_token(action_token)
+            print(self.connected_players)
         else:
             actor = self.get_player_by_token(action_token)
             if action_type == 'start_game':
                 self.start_game(actor)
-            elif action_type == 'change_team':
-                player_id = action.get('player_id')
-                new_team = action.get('new_team')
-                self.change_team(actor, player_id, new_team)
             elif action_type == 'remove_player':
                 player_id = action.get('player_id')
                 self.remove_player(actor, player_id)
@@ -163,9 +145,15 @@ class Room:
             elif action_type == 'change_host':
                 new_host_id = action.get('new_host_id')
                 self.change_host(actor, new_host_id)
-            elif action_type == 'make_move':
-                move_data = action.get('move_data')
-                self.game.make_move(actor.id, move_data)
+            elif action_type == 'pre_game_action':
+                pre_game_action = action.get('pre_game_action')
+                print(action)
+                if not pre_game_action:
+                    raise ValueError("Pre-game action data is required")
+                self.game.register_pre_game_action(actor.id, action_token == self.host_token, pre_game_action)
+            elif action_type == 'in_game_action':
+                in_game_action = action.get('in_game_action')
+                self.game.register_in_game_action(actor.id, in_game_action)
             else:
                 raise ValueError("Unknown action type")
         del action['action_token']
@@ -174,7 +162,7 @@ class Room:
     def get_player(self, player_id):
         """Get a player by ID."""
         # iterate through players to find the one with the given ID
-        for player in self.players.values():
+        for player in self.connected_players.values():
             if player.id == player_id:
                 return player
             
@@ -182,11 +170,11 @@ class Room:
     
     def get_player_by_token(self, player_token, raise_if_not_found=True):
         """Get a player by their token."""
-        if player_token not in self.players:
+        if player_token not in self.connected_players:
             if raise_if_not_found:
                 raise ValueError("Player not found with token: {}".format(player_token))
             return None
-        return self.players[player_token]
+        return self.connected_players[player_token]
     
     def is_host(self, player):
         """Check if a player is the host."""
@@ -201,20 +189,12 @@ class Room:
             dict: Room data for serialization
         """
         asker = self.get_player_by_token(asker_token, raise_if_not_found=False)
-        players_data = []
         host = self.get_player_by_token(self.host_token, raise_if_not_found=False)
-        for player in self.players.values():
-            players_data.append({
-                'id': player.id,
-                'name': player.name,
-                'team': player.team,
-                'is_host': host and player.id == host.id,
-            })
-            
         return {
             'room_id': self.room_id,
+            'type': self.game_type,
             'hostId': host.id if host else None,
-            'players': players_data,
             'receiverId': asker.id,
+            'connectedPlayers': [player.id for player in self.connected_players.values()],
             'game': self.game.to_dict(asker.id if asker else None),
         }

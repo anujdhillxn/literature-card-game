@@ -1,31 +1,38 @@
 import React from 'react';
-import type { RoomState } from '../../../types';
-import PlayerList from '../../Room/PlayerList';
+import type { ChangeTeamAction, PreGameAction, RoomState } from '../../../types';
+import PlayerList from './PlayerList';
 
 interface PreGameProps {
     roomState: RoomState;
-    connectionStatus: string;
-    isHost: boolean;
-    errorMessage: string | null;
-    onChangeTeam: (team: 1 | 2) => void;
+    onGameAction: (action: PreGameAction) => void;
     onChangeHost: (hostId: string) => void;
     onStartGame: () => void;
 }
 
 const PreGame: React.FC<PreGameProps> = ({
     roomState,
-    isHost,
-    onChangeTeam,
+    onGameAction,
     onChangeHost,
     onStartGame,
 }) => {
     const userId = roomState.receiverId;
+    const hostId = roomState.hostId;
+    const isHost = userId === hostId;
     const currentPlayer = roomState.game.players.find(p => p.id === userId);
     const currentTeam = currentPlayer ? currentPlayer.team : undefined;
-    const team1PlayerCount = roomState.players.filter(p => p.team === 1).length;
-    const team2PlayerCount = roomState.players.filter(p => p.team === 2).length;
+    const team1PlayerCount = roomState.game.players.filter(p => p.team === 1).length;
+    const team2PlayerCount = roomState.game.players.filter(p => p.team === 2).length;
 
     const canStartGame = team1PlayerCount === 3 && team2PlayerCount === 3;
+
+    const onChangeTeam = (team: 1 | 2): void => {
+        const action: ChangeTeamAction = {
+            type: 'change_team',
+            player_id: userId,
+            new_team: team,
+        }
+        onGameAction(action);
+    };
 
     return (
         <div className="pre-game">
@@ -71,7 +78,7 @@ const PreGame: React.FC<PreGameProps> = ({
             <div className="teams-container">
                 <PlayerList
                     team={1}
-                    players={roomState.players}
+                    players={roomState.game.players}
                     userId={userId}
                     currentPlayerId={null}
                     selectedPlayerId={null}
@@ -80,11 +87,12 @@ const PreGame: React.FC<PreGameProps> = ({
                     onSelectPlayer={() => { }}
                     isHost={isHost}
                     onMakeHost={onChangeHost}
+                    hostId={hostId}
                 />
 
                 <PlayerList
                     team={2}
-                    players={roomState.players}
+                    players={roomState.game.players}
                     userId={userId}
                     currentPlayerId={null}
                     selectedPlayerId={null}
@@ -93,6 +101,7 @@ const PreGame: React.FC<PreGameProps> = ({
                     onSelectPlayer={() => { }}
                     isHost={isHost}
                     onMakeHost={onChangeHost}
+                    hostId={hostId}
                 />
             </div>
 

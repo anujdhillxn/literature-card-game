@@ -1,25 +1,23 @@
 // src/types/game.ts
 export type Card = string; // Format: "AC1", "2H5", etc.
 
-export type Player = {
+export interface Player {
     id: string;
     name: string;
     team: 1 | 2;
-    hand?: Card[];
+    hand: Card[];
     card_count: number;
-    is_host?: boolean;
-};
+}
 
 export type Ask = {
-    askingPlayerId: number;
-    askedPlayerId: number;
+    askingPlayerId: string;
+    askedPlayerId: string;
     card: Card;
     success: boolean;
 };
 
 export type GameState = {
     gameId: string;
-    type: string;
     players: Player[];
     currentPlayerId: string | null;
     claimedSets: Record<number, 1 | 2>;
@@ -32,7 +30,8 @@ export type GameState = {
 export type RoomState = {
     room_id: string;
     hostId: string;
-    players: Player[];
+    type: string;
+    connectedPlayers: string[];
     game: GameState;
     receiverId: string;
 };

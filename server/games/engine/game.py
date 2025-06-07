@@ -5,7 +5,7 @@ Manages a complete game session including players, turns, and game logic.
 
 import random
 from .card import ALL_CARDS, get_set_cards, get_set_name, get_set_number
-
+from .player import LiteraturePlayer, Player
 # Game state constants
 NOT_STARTED = "not_started"
 IN_PROGRESS = "in_progress"
@@ -22,13 +22,48 @@ class Game:
             game_id: Unique identifier for the game
         """
         self.game_id = game_id
-        self.players = []  # Will be populated in start_game
+        self.players = {} # Map player IDs to Player objects
         self.current_turn_player_id = None
         self.claimed_sets = {}  # Map set numbers to the team that claimed it
         self.scores = {1: 0, 2: 0}  # Map team IDs to scores (teams are 1 and 2)
         self.state = NOT_STARTED
         self.winning_team = None
         self.last_ask = None  # Details about the most recent ask
+    
+    def add_player(self, player_id, player_name, player_token):
+        """
+        Create a new player instance.
+        
+        Args:
+            player_id: Unique identifier for the player
+            player_name: Name of the player
+            player_token: Unique token for the player
+            team: Team number (1 or 2)
+            
+        Returns:
+            Player: The created player object
+        """
+        team = 1 if len(self.players) % 2 == 0 else 2
+        if len(self.players) >= 6:
+            raise ValueError("Cannot add more than 6 players to the game")
+        player = LiteraturePlayer(player_id, player_name, player_token, team)
+        self.players[player_id] = player
+        return player
+    
+    def remove_player(self, player_id):
+        """
+        Remove a player from the game.
+        
+        Args:
+            player_id: Unique identifier for the player
+            
+        Raises:
+            ValueError: If the player does not exist
+        """
+        if player_id in self.players:
+            del self.players[player_id]
+            if self.current_turn_player_id == player_id:
+                self.current_turn_player_id = None
     
     def get_player(self, player_id):
         """
@@ -40,9 +75,8 @@ class Game:
         Returns:
             Player: The player object or None if not found
         """
-        for player in self.players:
-            if player.id == player_id:
-                return player
+        if player_id in self.players:
+            return self.players[player_id]
         raise ValueError(f"Player with ID {player_id} not found")
     
     def get_player_by_token(self, token):
@@ -55,7 +89,7 @@ class Game:
         Returns:
             Player: The player object or None if not found
         """
-        for player in self.players:
+        for player in self.players.values():
             if player.token == token:
                 return player
         return None
@@ -70,15 +104,11 @@ class Game:
         Returns:
             list: List of Player objects in the team
         """
-        return [player for player in self.players if player.team == team]
+        return [player for player in self.players.values() if player.team == team]
     
-    def start_game(self, players):
+    def start_game(self):
         """
         Start the game with the provided players and a randomly selected starting player.
-        
-        Args:
-            players: List of Player objects to start the game with.
-            
         Raises:
             ValueError: If there are not exactly 3 players on each team
                       or if the game has already started
@@ -90,17 +120,14 @@ class Game:
             raise ValueError("Game has already started or ended")
             
         # Count players on each team
-        team1_count = sum(1 for p in players if p.team == 1)
-        team2_count = sum(1 for p in players if p.team == 2)
+        team1_count = sum(1 for p in self.players.values() if p.team == 1)
+        team2_count = sum(1 for p in self.players.values() if p.team == 2)
         
         if team1_count != 3 or team2_count != 3:
             raise ValueError(f"Each team must have exactly 3 players (Team 1: {team1_count}, Team 2: {team2_count})")
             
-        if len(players) != 6: raise ValueError("Exactly 6 players required")
-        for player in players:
-            self.players.append(player)
-        # Randomly select a starting player
-        starting_player = random.choice(list(self.players))
+        if len(self.players) != 6: raise ValueError("Exactly 6 players required")
+        starting_player = random.choice(list(self.players.values()))
         self.current_turn_player_id = starting_player.id
         
         self.deal_cards()
@@ -116,7 +143,7 @@ class Game:
         deck = list(ALL_CARDS)
         random.shuffle(deck)
         
-        for player in self.players:
+        for player in self.players.values():
             player.hand = set(deck[:9])
             deck = deck[9:]
     
@@ -237,7 +264,7 @@ class Game:
         cards_needed = get_set_cards(set_number)
         cards_held = self.get_cards_held_by_team(declaring_player.team)
 
-        for player in self.players:
+        for player in self.players.values():
             player.hand = set([card for card in player.hand if card not in cards_needed])
     
         if cards_needed.issubset(cards_held):
@@ -274,35 +301,46 @@ class Game:
         
         self.current_turn_player_id = teammate_id
     
-    def make_move(self, mover_id, move_data):
-        """
-        Process a player's move in the game.
-        Args:
-            action (dict): Action data containing:
-        """
+    def register_pre_game_action(self, actor_id, is_actor_host, action):
+        if self.state != NOT_STARTED:
+            raise ValueError("Game has already started or ended")
+        action_type = action.get('type')
+        if action_type == 'change_team':
+            new_team = action.get('new_team')
+            player_id = action.get('player_id')
+            if not new_team or not player_id:
+                raise ValueError("Invalid move data for change_team")
+            if actor_id != player_id and not is_actor_host:
+                raise ValueError("Only the player or host can change team")
+            player = self.get_player(player_id)
+            player.team = new_team
+        else:
+            raise ValueError(f"Unknown pre-game action type: {action_type}")
+    
+    def register_in_game_action(self, actor_id, action):
         if self.state != IN_PROGRESS:
             raise ValueError("Game is not active")
-        move_type = move_data.get('move_type')
-        if mover_id != self.current_turn_player_id:
-            raise ValueError(f"Not {self.get_player(mover_id).name}'s turn")
-        if move_type == 'ask_card':
-            asked_player_id = move_data.get('asked_player_id')
-            card = move_data.get('card')
+        action_type = action.get('type')
+        if actor_id != self.current_turn_player_id:
+            raise ValueError(f"Not {self.get_player(actor_id).name}'s turn")
+        if action_type == 'ask_card':
+            asked_player_id = action.get('asked_player_id')
+            card = action.get('card')
             if not asked_player_id or not card:
                 raise ValueError("Invalid move data for ask_card")
-            self.ask_for_card(mover_id, asked_player_id, card)
-        elif move_type == 'claim_set':
-            set_number = move_data.get('set_number')
+            self.ask_for_card(actor_id, asked_player_id, card)
+        elif action_type == 'claim_set':
+            set_number = action.get('set_number')
             if not set_number:
                 raise ValueError("Invalid move data for claim_set")
-            self.claim_set(set_number, mover_id)
-        elif move_type == 'pass_turn':
-            teammate_id = move_data.get('teammate_id')
+            self.claim_set(set_number, actor_id)
+        elif action_type == 'pass_turn':
+            teammate_id = action.get('teammate_id')
             if not teammate_id:
                 raise ValueError("Invalid move data for pass_turn")
-            self.pass_turn_to_teammate(mover_id, teammate_id)
+            self.pass_turn_to_teammate(actor_id, teammate_id)
         else:
-            raise ValueError(f"Unknown move type: {move_type}")
+            raise ValueError(f"Unknown move type: {action_type}")
     
     def to_dict(self, asker_id):
         """
@@ -315,7 +353,7 @@ class Game:
             dict: Game data for serialization
         """
         players_data = []
-        for player in self.players:
+        for player in self.players.values():
             player_data = player.to_dict()
             include_hands = (asker_id and self.state == IN_PROGRESS and player.id == asker_id)
             if not include_hands:

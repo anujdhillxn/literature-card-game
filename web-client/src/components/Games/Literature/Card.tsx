@@ -1,6 +1,6 @@
 // src/components/Room/Card.tsx
 import React from 'react';
-import { type Card as CardType } from '../../types';
+import { type Card as CardType } from '../../../types';
 
 interface CardProps {
     card: CardType;

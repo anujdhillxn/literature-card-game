@@ -4,15 +4,14 @@ import useWebSocket from '../../hooks/useWebSocket';
 import type {
     RoomState,
     WebSocketMessage,
-    AskCardMove,
-    ClaimSetMove,
-    PassTurnMove,
     RoomActions,
-    ChangeTeamActionPayload,
     StartGameActionPayload,
     RemovePlayerActionPayload,
     ChangeHostActionPayload,
-    MakeMoveActionPayload
+    InGameAction,
+    InGameActionPayload,
+    PreGameAction,
+    PreGameActionPayload,
 } from '../../types';
 import ErrorMessage from '../ErrorMessage';
 import './Room.css';
@@ -55,70 +54,63 @@ const Room: React.FC<RoomProps> = ({ roomId, userToken, username, onLeaveRoom })
     }, [errorMessage]);
 
     const handleStartGame = (): void => {
-        const action: StartGameActionPayload = {
+        const payload: StartGameActionPayload = {
             type: 'start_game',
-            room_id: roomId
         };
-        sendMessage(action);
+        sendMessage(payload);
     };
 
     const handleLeaveRoom = (): void => {
-        const action: RemovePlayerActionPayload = {
+        const payload: RemovePlayerActionPayload = {
             type: 'remove_player',
             player_id: userId!,
-            room_id: roomId
         };
-        sendMessage(action);
+        sendMessage(payload);
 
         closeConnection();
         onLeaveRoom();
     };
 
     const handleChangeHost = (newHostId: string): void => {
-        const action: ChangeHostActionPayload = {
+        const payload: ChangeHostActionPayload = {
             type: 'change_host',
             new_host_id: newHostId,
-            room_id: roomId
         };
-        sendMessage(action);
+        sendMessage(payload);
     };
 
-    const handleChangeTeam = (newTeam: 1 | 2): void => {
-        const action: ChangeTeamActionPayload = {
-            type: 'change_team',
-            player_id: userId!,
-            new_team: newTeam,
-            room_id: roomId
+    const handleInGameAction = (action: InGameAction): void => {
+        const payload: InGameActionPayload = {
+            type: 'in_game_action',
+            in_game_action: action
         };
-        sendMessage(action);
-    };
+        sendMessage(payload);
+    }
 
-    const handleGameAction = (moveData: AskCardMove | ClaimSetMove | PassTurnMove): void => {
-        const action: MakeMoveActionPayload = {
-            type: 'make_move',
-            room_id: roomId,
-            move_data: moveData
-        };
-        sendMessage(action);
+    const handlePreGameAction = (action: PreGameAction): void => {
+        const payload: PreGameActionPayload = {
+            type: 'pre_game_action',
+            pre_game_action: action
+        }
+        sendMessage(payload);
     }
 
     const roomActions: RoomActions = {
         onStartGame: handleStartGame,
         onLeaveRoom: handleLeaveRoom,
         onChangeHost: handleChangeHost,
-        onChangeTeam: handleChangeTeam,
-        onGameAction: handleGameAction
+        onInGameAction: handleInGameAction,
+        onPreGameAction: handlePreGameAction
     };
 
     if (status === 'connecting' || !roomState) {
         return <><div className="loading">Connecting to room {roomId}...</div>        <div><button onClick={onLeaveRoom} className="leave-btn">Leave Room</button></div></>;
     }
-
     return <div className='room'>
-        {errorMessage && <ErrorMessage message={errorMessage} />}
+        {errorMessage && <ErrorMessage message={displayError} />}
         <h2>Room: {roomId}</h2>
         <div><button onClick={onLeaveRoom} className="leave-btn">Leave Room</button></div>
-        <Game connectionStatus={status} roomActions={roomActions} roomState={roomState} errorMessage={displayError} />
+        <Game roomActions={roomActions} roomState={roomState} />
     </div>
 };
 
