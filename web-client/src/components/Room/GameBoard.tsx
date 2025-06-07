@@ -5,7 +5,6 @@ import PlayerList from './PlayerList';
 import SetGrid from './SetGrid';
 import Card from './Card';
 import LastAsk from './LastAsk';
-import ErrorMessage from '../ErrorMessage';
 import { ALL_CARDS, getPlayerName, getPlayerTeam, SET_NAMES } from '../../utils/cardHelpers';
 
 interface GameBoardProps {
@@ -18,11 +17,8 @@ interface GameBoardProps {
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({
-    roomId,
     userId,
     roomState,
-    errorMessage,
-    onLeaveRoom,
     onGameAction
 }) => {
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
@@ -70,9 +66,6 @@ const GameBoard: React.FC<GameBoardProps> = ({
     const isMyTurn = currentPlayer?.id === userId;
     return (
         <div className="game-active">
-            {errorMessage && <ErrorMessage message={errorMessage} />}
-            <h2>Room: {roomId}</h2>
-            <button onClick={onLeaveRoom} className="leave-btn">Leave Room</button>
             <div className="game-status">
                 <div className="turn-indicator">
                     Current Turn: <strong>{getPlayerName(roomState.game.players, roomState.game.currentPlayerId!)}</strong> (Team {getPlayerTeam(roomState.game.players, roomState.game.currentPlayerId!)})

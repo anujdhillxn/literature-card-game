@@ -17,6 +17,7 @@ import GameBoard from './GameBoard';
 import GameOver from './GameOver';
 import PreGame from './PreGame';
 import './Room.css';
+import ErrorMessage from '../ErrorMessage';
 interface RoomProps {
     roomId: string;
     userToken: number;
@@ -113,6 +114,7 @@ const Room: React.FC<RoomProps> = ({ roomId, userToken, username, onLeaveRoom })
         return <div className="loading">Connecting to room {roomId}...</div>;
     }
 
+
     const currentState = () => {
         if (!userId) {
             return <div className="error">Error: User ID not found in room state.</div>;
@@ -150,12 +152,14 @@ const Room: React.FC<RoomProps> = ({ roomId, userToken, username, onLeaveRoom })
                 onChangeTeam={handleChangeTeam}
                 onChangeHost={handleChangeHost}
                 onStartGame={handleStartGame}
-                onLeaveRoom={handleLeaveRoom}
             />
         );
     }
 
     return <div className='room'>
+        {errorMessage && <ErrorMessage message={errorMessage} />}
+        <h2>Room: {roomId}</h2>
+        <button onClick={onLeaveRoom} className="leave-btn">Leave Room</button>
         {currentState()}
     </div>
 };

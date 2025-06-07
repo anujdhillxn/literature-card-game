@@ -1,7 +1,6 @@
 import React from 'react';
 import type { RoomState } from '../../types';
 import PlayerList from './PlayerList';
-import ErrorMessage from '../ErrorMessage';
 
 interface PreGameProps {
     roomId: string;
@@ -13,20 +12,15 @@ interface PreGameProps {
     onChangeTeam: (team: 1 | 2) => void;
     onChangeHost: (hostId: string) => void;
     onStartGame: () => void;
-    onLeaveRoom: () => void;
 }
 
 const PreGame: React.FC<PreGameProps> = ({
-    roomId,
     userId,
     roomState,
-    connectionStatus,
     isHost,
-    errorMessage,
     onChangeTeam,
     onChangeHost,
     onStartGame,
-    onLeaveRoom,
 }) => {
     const currentPlayer = roomState.game.players.find(p => p.id === userId);
     const currentTeam = currentPlayer ? currentPlayer.team : undefined;
@@ -37,9 +31,6 @@ const PreGame: React.FC<PreGameProps> = ({
 
     return (
         <div className="pre-game">
-            {errorMessage && <ErrorMessage message={errorMessage} />}
-            <h2>Room Waiting Area: {roomId}</h2>
-            <p className="connection-status">Status: {connectionStatus}</p>
 
             <div className="game-info">
                 <h3>Game Rules</h3>
@@ -65,7 +56,6 @@ const PreGame: React.FC<PreGameProps> = ({
                         Start Game
                     </button>
                 )}
-                <button onClick={onLeaveRoom} className="leave-btn">Leave Room</button>
             </div>
             <div className="team-selection">
                 {currentTeam !== 1 && (
