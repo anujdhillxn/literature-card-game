@@ -108,6 +108,7 @@ const Room: React.FC<RoomProps> = ({ roomId, userToken, username, onLeaveRoom })
     }
     return <div className='room'>
         {errorMessage && <ErrorMessage message={displayError} />}
+        <div>Connection Status: {status}</div>
         <h2>Room: {roomId}</h2>
         <div><button onClick={onLeaveRoom} className="leave-btn">Leave Room</button></div>
         <Game roomActions={roomActions} roomState={roomState} />

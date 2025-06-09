@@ -1,6 +1,5 @@
 inheritance refactor
 better error and game log handling in ui
-add private/public rooms
 -----------------
 authentication
 allow room creation only for authenticated users

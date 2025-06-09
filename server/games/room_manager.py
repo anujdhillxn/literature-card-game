@@ -19,6 +19,12 @@ class RoomManager:
     
     def __init__(self):
         self.rooms = {}  # room_id -> Room
+        self.create_public_rooms()
+
+    def create_public_rooms(self):
+        """Create initial public rooms for the game."""
+        for _ in range(5):
+            self.create_room(room_id="public_" + str(_))
 
     def register_action(self, action):
         """Register an action from a player and return the updated room state."""
@@ -30,10 +36,10 @@ class RoomManager:
             raise ValueError("Room does not exist")
         room.register_action(action)
     
-    def create_room(self):
+    def create_room(self, game_type='literature', room_id=None):
         """Create a new room with the given host."""
          
-        room = Room()
+        room = Room(game_type, room_id)
         self.rooms[room.room_id] = room
         return room
     
@@ -43,5 +49,10 @@ class RoomManager:
             
     def list_available_rooms(self):
         """List all rooms that haven't started games yet."""
-        return [room.to_dict() for room in self.rooms.values() 
-                if room.game.state == NOT_STARTED]
+        res = []
+        for room in self.rooms.values():
+            res.append({
+                "room_id": room.room_id,
+                "game_type": room.game_type,
+            })
+        return res

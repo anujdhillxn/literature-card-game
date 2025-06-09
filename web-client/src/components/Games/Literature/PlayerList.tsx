@@ -50,7 +50,7 @@ const PlayerList: React.FC<PlayerListProps> = ({
                     const isCurrentTurn = p.id === currentPlayerId;
                     const isSelected = p.id === selectedPlayerId;
                     const canBeSelected = !isCurrentUser && p.team !== currentUserTeam && isPlaying;
-                    const disconnected = !(roomState?.connectedPlayers.includes(p.id));
+                    const disconnected = roomState && !(roomState?.connectedPlayers.includes(p.id));
                     return (
                         <li
                             key={p.id}

@@ -11,3 +11,10 @@ class CreateRoomView(APIView):
         room = RoomManager.get_instance().create_room()
         return JsonResponse({'room_id': room.room_id})
     
+
+class ListRoomsView(APIView):
+    permission_classes = [AllowAny]  # Override default permission classes
+    authentication_classes = []  # Override default authentication classes
+    def get(self, request):
+        rooms = RoomManager.get_instance().list_available_rooms()
+        return JsonResponse({'rooms': rooms})

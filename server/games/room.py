@@ -23,7 +23,6 @@ class Room:
         """
         self.room_id = room_id or self._generate_room_id()
         self.game_type = game_type
-        print(game_type, self.game_type)
         self.connected_players = {}  # token -> Player object
         self.game = self.create_game_instance()
         self.host_token = None
@@ -132,7 +131,6 @@ class Room:
                 raise ValueError("Player name is required")
             self.add_player(player_name, action_token)
             actor = self.get_player_by_token(action_token)
-            print(self.connected_players)
         else:
             actor = self.get_player_by_token(action_token)
             if action_type == 'start_game':
@@ -147,7 +145,6 @@ class Room:
                 self.change_host(actor, new_host_id)
             elif action_type == 'pre_game_action':
                 pre_game_action = action.get('pre_game_action')
-                print(action)
                 if not pre_game_action:
                     raise ValueError("Pre-game action data is required")
                 self.game.register_pre_game_action(actor.id, action_token == self.host_token, pre_game_action)

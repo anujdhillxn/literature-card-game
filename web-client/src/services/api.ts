@@ -19,3 +19,18 @@ export const createRoom = async (): Promise<string> => {
 export const generateRandomUserId = (): number => {
     return Math.floor(Math.random() * 1_000_000_000);
 };
+
+export const listRooms = async (): Promise<string[]> => {
+    const response = await fetch(`${API_BASE_URL}/games/list-rooms`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to list rooms");
+    }
+
+    const data = await response.json();
+    return data.rooms.map((room) => room.room_id);
+};
