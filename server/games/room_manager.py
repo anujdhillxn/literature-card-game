@@ -7,6 +7,8 @@ from .room import Room
 from .engine.player import Player
 from .engine.game import NOT_STARTED
 
+available_game_types = ['literature', ]
+
 class RoomManager:
     """Singleton manager for game rooms."""
     _instance = None
@@ -23,8 +25,9 @@ class RoomManager:
 
     def create_public_rooms(self):
         """Create initial public rooms for the game."""
-        for _ in range(5):
-            self.create_room(room_id="public_" + str(_))
+        for game_type in available_game_types:
+            for _ in range(5):
+                self.create_room(game_type, room_id = "Public_" + game_type + "_game_" + str(_))
 
     def register_action(self, action):
         """Register an action from a player and return the updated room state."""
@@ -36,7 +39,7 @@ class RoomManager:
             raise ValueError("Room does not exist")
         room.register_action(action)
     
-    def create_room(self, game_type='literature', room_id=None):
+    def create_room(self, game_type, room_id=None):
         """Create a new room with the given host."""
          
         room = Room(game_type, room_id)

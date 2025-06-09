@@ -1,10 +1,10 @@
 import React from 'react';
-import type { ChangeTeamAction, PreGameAction, RoomState } from '../../../types';
+import type { ChangeTeamAction, LiteraturePreGameAction, LiteratureRoomState } from '../../../types';
 import PlayerList from './PlayerList';
 
 interface PreGameProps {
-    roomState: RoomState;
-    onGameAction: (action: PreGameAction) => void;
+    roomState: LiteratureRoomState;
+    onGameAction: (action: LiteraturePreGameAction) => void;
     onChangeHost: (hostId: string) => void;
     onStartGame: () => void;
 }

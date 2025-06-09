@@ -1,6 +1,7 @@
 /* Modern Literature Card Game CSS */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* ==================== VARIABLES ==================== */
 :root {
   /* Modern Color Palette */
   --primary-color: #4f46e5;
@@ -71,7 +72,7 @@
   --radius-full: 9999px;
 }
 
-/* Base Styles */
+/* ==================== BASE STYLES ==================== */
 * {
   box-sizing: border-box;
   transition: all 0.2s ease;
@@ -83,6 +84,7 @@ body {
   line-height: 1.6;
 }
 
+/* ==================== LAYOUT & STRUCTURE ==================== */
 .room {
   margin: 0 auto;
   padding: var(--space-lg);
@@ -91,39 +93,85 @@ body {
   flex-direction: column;
 }
 
-/* Error Message */
-.error {
-  background-color: var(--bg-error);
-  color: var(--text-error);
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: var(--space-md) var(--space-lg);
-  border-radius: var(--radius-md);
   margin-bottom: var(--space-lg);
+  background-color: var(--bg-white);
+  top: 0;
+  z-index: 30;
+}
+
+.room-header span {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  flex-grow: 1;
+  text-align: center;
+}
+
+.room-header div:first-child {
+  font-size: 0.9rem;
+  color: var(--text-medium);
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
 }
 
-.error:before {
-  content: "⚠️";
-  margin-right: var(--space-sm);
+.room-header div:first-child::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--secondary-color);
+  margin-right: var(--space-xs);
 }
 
-.loading {
-  text-align: center;
-  padding: var(--space-xl);
-  font-style: italic;
-  color: var(--text-medium);
+.room-header div:first-child:has(:contains("Disconnected"))::before {
+  background-color: var(--danger-color);
 }
 
-.team {
-  flex: 1;
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
-  box-shadow: var(--shadow-md);
+/* ==================== TEAMS & PLAYERS ==================== */
+.teams-container {
+  display: flex;
+  gap: var(--space-xl);
+  margin: var(--space-lg) 0;
+}
+
+/* Team containers */
+.team-container {
   background-color: var(--bg-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-sm);
+  width: 100%;
 }
 
+.team-container h3 {
+  margin-top: 0;
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.team-container ul {
+  padding-left: 0; /* Removed bullets */
+  margin-bottom: var(--space-lg);
+  list-style-type: none;
+}
+
+.team-container li.you {
+  font-weight: 600;
+  background-color: var(--bg-highlight);
+}
+
+/* Team colors */
 .team1 {
   border-left: 4px solid var(--team1-color);
   background-color: var(--team1-bg-light);
@@ -134,34 +182,34 @@ body {
   background-color: var(--team2-bg-light);
 }
 
-.team h3 {
-  margin-top: 0;
-  padding-bottom: var(--space-sm);
-  border-bottom: 1px solid var(--border-light);
-  color: var(--text-dark);
-  font-weight: 600;
+.team-container.team1 {
+  background-color: var(--team1-bg-light);
 }
 
-.team ul {
-  padding-left: var(--space-lg);
-  margin-bottom: var(--space-lg);
-  list-style-type: none;
+.team-container.team2 {
+  background-color: var(--team2-bg-light);
 }
 
-.team li {
-  margin-bottom: var(--space-sm);
-  padding: var(--space-sm) var(--space-md);
+.team-selection {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: var(--radius-md);
+  gap: var(--space-md);
+  justify-content: center;
+  margin: var(--space-xl) 0 var(--space-lg);
 }
 
-.team li.you {
+/* Players */
+.players {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.player.current-turn {
   font-weight: 600;
-  background-color: var(--bg-highlight);
+  position: relative;
 }
 
+/* ==================== BADGES & INDICATORS ==================== */
 .host-badge, .you-badge {
   font-size: 0.75rem;
   padding: var(--space-xs) var(--space-sm);
@@ -180,19 +228,22 @@ body {
   color: var(--text-light);
 }
 
-.make-host-btn {
-  font-size: 0.8em;
-  padding: var(--space-xs) var(--space-sm);
+.your-turn {
+  color: var(--secondary-color);
+  font-weight: 600;
+  animation: pulse 1.5s infinite;
+  padding: var(--space-xs) var(--space-lg);
   border-radius: var(--radius-full);
+  background-color: var(--bg-success);
 }
 
-.room-controls {
-  display: flex;
-  gap: var(--space-md);
-  margin-top: var(--space-xl);
+@keyframes pulse {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
 }
 
-/* Button Styles */
+/* ==================== BUTTONS ==================== */
 button {
   cursor: pointer;
   padding: var(--space-sm) var(--space-lg);
@@ -241,138 +292,34 @@ button:disabled {
   background-color: var(--danger-dark);
 }
 
-/* Game in progress */
-.game-status {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-lg);
-  padding: var(--space-lg);
-  background-color: var(--bg-white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.your-turn {
-  color: var(--secondary-color);
-  font-weight: 600;
-  animation: pulse 1.5s infinite;
-  padding: var(--space-xs) var(--space-lg);
+.make-host-btn {
+  font-size: 0.8em;
+  padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-full);
-  background-color: var(--bg-success);
 }
 
-.your-hand {
-  align-self: end;
-  background-color: var(--bg-white);
-  border-radius: var(--radius-lg);
-  padding: var(--space-md);
-  box-shadow: var(--shadow-md);
-  margin-top: auto;
-}
-
-@keyframes pulse {
-  0% { opacity: 0.8; }
-  50% { opacity: 1; }
-  100% { opacity: 0.8; }
-}
-
-.score {
+.room-controls {
   display: flex;
   gap: var(--space-md);
-  font-weight: 500;
-}
-
-.team1, .team2 {
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-full);
-  font-weight: 600;
-}
-
-.last-action {
-  margin-bottom: var(--space-lg);
-  padding: var(--space-lg);
-  background-color: var(--bg-white);
-  border-radius: var(--radius-lg);
-  border-left: 4px solid var(--warning-color);
-  box-shadow: var(--shadow-sm);
-}
-
-.game-board {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto auto 1fr auto;
-  gap: var(--space-lg);
-  height: calc(100vh - 120px);
-  min-height: 600px;
-}
-
-.teams-panel {
-  display: flex;
-  gap: var(--space-lg);
-  align-items: center;
-}
-
-.players {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.player {
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-md);
-  transition: all 0.2s ease;
-  margin-bottom: var(--space-xs);
-}
-
-.player.selected {
-  background-color: var(--bg-selected);
-  box-shadow: var(--shadow-sm);
-}
-
-.player.current-turn {
-  font-weight: 600;
-  position: relative;
-}
-
-/* Team containers in game view */
-.team-container {
-  background-color: var(--bg-white);
-  border-radius: var(--radius-lg);
-  padding: var(--space-md);
-  box-shadow: var(--shadow-sm);
-  width: 100%;
-}
-
-.team-container.team1 {
-  background-color: var(--team1-bg-light);
-}
-
-.team-container.team2 {
-  background-color: var(--team2-bg-light);
-}
-
-/* Card styling */
-.cards-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
   justify-content: center;
-  padding: var(--space-md);
+  margin: var(--space-xl) 0;
 }
 
+.action-controls {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+  justify-content: center;
+}
+
+/* ==================== CARDS ==================== */
 .card-wrapper {
   perspective: 1000px;
   transition: transform 0.3s;
 }
 
-.card-wrapper:hover {
-  transform: translateY(-5px);
-}
-
 .card {
-  width: 100px; /* Increased card size */
+  width: 100px;
   height: 140px;
   border-radius: var(--radius-md);
   display: flex;
@@ -403,6 +350,17 @@ button:disabled {
 
 .card.black {
   color: var(--card-black);
+}
+
+.card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--bg-disabled);
+  box-shadow: none;
+}
+
+.card.display-only {
+  cursor: default;
 }
 
 .card .rank {
@@ -438,7 +396,7 @@ button:disabled {
   border-radius: var(--radius-md);
 }
 
-/* Sets Grid */
+/* ==================== SETS GRID ==================== */
 .claimed-sets {
   flex-grow: 1;
   box-shadow: var(--shadow-sm);
@@ -448,10 +406,12 @@ button:disabled {
 }
 
 .sets-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-md);
   margin-bottom: var(--space-lg);
+  justify-content: center;
+  padding-bottom: 100px;
 }
 
 .set {
@@ -502,74 +462,7 @@ button:disabled {
   font-size: 0.8em;
 }
 
-.no-cards {
-  padding: var(--space-lg);
-  background-color: var(--bg-light);
-  border-radius: var(--radius-lg);
-  text-align: center;
-  box-shadow: var(--shadow-sm);
-}
-
-.pass-turn {
-  margin-top: var(--space-md);
-}
-
-.teammate-options {
-  display: flex;
-  gap: var(--space-sm);
-  justify-content: center;
-  margin-top: var(--space-md);
-}
-
-.action-controls {
-  display: flex;
-  gap: var(--space-md);
-  margin-top: var(--space-lg);
-  justify-content: center;
-}
-
-/* Game Result */
-.game-result {
-  text-align: center;
-  margin-bottom: var(--space-xl);
-  padding: var(--space-lg);
-  background-color: var(--bg-white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-}
-
-.disconnected {
-  color: var(--text-error);
-  font-weight: 600;
-  margin-bottom: var(--space-md);
-}
-
-.winner {
-  font-size: 1.5em;
-  font-weight: 700;
-  color: var(--secondary-color);
-  margin: var(--space-md) 0;
-  padding: var(--space-lg);
-  background-color: var(--bg-success);
-  border-radius: var(--radius-lg);
-  display: inline-block;
-}
-
-.game-info {
-  margin-top: var(--space-xl);
-  padding: var(--space-lg);
-  background-color: var(--bg-info);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.game-info h3 {
-  margin-top: 0;
-  font-weight: 600;
-  color: var(--primary-dark);
-}
-
-/* Card Selection Modal */
+/* ==================== CARD SELECTION MODAL ==================== */
 .card-selection-overlay {
   position: fixed;
   top: 0;
@@ -582,6 +475,7 @@ button:disabled {
   align-items: center;
   z-index: 100;
   backdrop-filter: blur(3px);
+  animation: fadeIn 0.2s ease-in-out;
 }
 
 .card-selection-dialog {
@@ -589,10 +483,11 @@ button:disabled {
   border-radius: var(--radius-lg);
   max-width: 800px;
   width: 90%;
-  max-height: 85vh;
+  max-height: 90vh;
   box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
+  animation: slideUp 0.3s ease-out;
 }
 
 /* Fixed header */
@@ -641,75 +536,8 @@ button:disabled {
   font-weight: 500;
 }
 
-/* Every 6th card should have margin-bottom */
-.cards-selection-grid .card-wrapper:nth-child(6n) {
-  margin-bottom: var(--space-sm);
-}
-
-/* Remove the existing vertical dividers */
-.cards-selection-grid .card-wrapper:nth-child(6n)::after,
-.cards-selection-grid .card-wrapper:nth-child(6n)::before {
-  display: none;
-}
-
-/* Make mobile-responsive */
-@media (max-width: 1000px) {
-  .cards-selection-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  
-  .set-divider {
-    grid-column: 1 / span 3;
-  }
-}
-
-@media screen and (max-width: 500px) {
-  .cards-selection-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .set-divider {
-    grid-column: 1 / span 2;
-  }
-}
-
-/* Fixed footer with buttons */
-.dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-md);
-  padding: var(--space-md);
-  border-top: 1px solid var(--border-light);
-  background: var(--bg-white);
-  position: sticky;
-  bottom: 0;
-  width: 100%;
-  z-index: 10;
-  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-.card.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: var(--bg-disabled);
-  box-shadow: none;
-}
-
-.card.display-only {
-  cursor: default;
-}
-
-@media (max-width: 1000px) {
-  .teams-panel {
-    grid-template-columns: 1fr;
-  }
-  
-  .card {
-    width: 80px;
-    height: 112px;
-  }
-}
-
+/* ==================== GAME STATES ==================== */
+/* Pre-game */
 .pre-game {
   width: 100%;
   padding: var(--space-lg);
@@ -730,43 +558,63 @@ button:disabled {
   grid-template-columns: repeat(2, 1fr);
 }
 
+/* Game Result */
+.game-result {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+  padding: var(--space-lg);
+  background-color: var(--bg-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.winner {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: var(--secondary-color);
+  margin: var(--space-md) 0;
+  padding: var(--space-lg);
+  background-color: var(--bg-success);
+  border-radius: var(--radius-lg);
+  display: inline-block;
+}
+
+/* ==================== STATUS AND INFO ==================== */
+.loading {
+  text-align: center;
+  padding: var(--space-xl);
+  font-style: italic;
+  color: var(--text-medium);
+}
+
+.error {
+  background-color: var(--bg-error);
+  color: var(--text-error);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.error:before {
+  content: "⚠️";
+  margin-right: var(--space-sm);
+}
+
+.disconnected {
+  color: var(--text-error);
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+}
+
 .connection-status {
   text-align: center;
   color: var(--text-medium);
   margin-bottom: var(--space-lg);
   font-size: 0.9rem;
-}
-
-.teams-container {
-  display: flex;
-  gap: var(--space-xl);
-  margin: var(--space-lg) 0;
-}
-
-@media (max-width: 1000px) {
-  .teams-container {
-    flex-direction: column;
-  }
-  .game-rules {
-    grid-template-columns: 1fr;
-  }
-  .sets-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.team-selection {
-  display: flex;
-  gap: var(--space-md);
-  justify-content: center;
-  margin: var(--space-xl) 0 var(--space-lg);
-}
-
-.room-controls {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-md);
-  margin: var(--space-xl) 0;
 }
 
 .game-info {
@@ -791,4 +639,299 @@ button:disabled {
 
 .game-info li {
   margin-bottom: var(--space-sm);
+}
+
+/* ==================== IN-GAME IMPROVEMENTS ==================== */
+.game-active {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 80px);
+  position: relative;
+  padding-bottom: 220px; /* Space for fixed hand */
+}
+
+/* Improved game status bar with better contrast */
+.game-status {
+  background: linear-gradient(to right, var(--bg-white), var(--bg-light));
+  border-left: 4px solid var(--primary-color);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-md);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.turn-indicator {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* Enhanced score display */
+.score {
+  display: flex;
+  gap: var(--space-lg);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.score .team1 {
+  color: var(--team1-color);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-md);
+  background-color: var(--team1-bg-light);
+}
+
+.score .team2 {
+  color: var(--team2-color);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-md);
+  background-color: var(--team2-bg-light);
+}
+
+/* Improved game board layout */
+.game-board {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 1fr;
+  gap: var(--space-md);
+}
+
+/* Enhanced teams panel */
+.teams-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  align-items: flex-start;
+  margin-bottom: var(--space-md);
+}
+
+/* Better "your hand" styling */
+.your-hand {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--bg-white);
+  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border-light);
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+}
+
+.your-hand h3 {
+  margin-top: 0;
+  margin-bottom: var(--space-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: var(--space-xs);
+}
+
+/* Improved card container */
+.cards-container {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  overflow-x: scroll;
+}
+
+/* Better card hover */
+.card-wrapper:hover {
+  transform: translateY(-8px) rotate(2deg);
+  z-index: 2;
+}
+
+/* Improved last action display */
+.last-action {
+  background: linear-gradient(to right, var(--bg-warning), var(--bg-light));
+  margin-bottom: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  border-left: 4px solid var(--warning-color);
+  box-shadow: var(--shadow-sm);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Improved dialog actions */
+.dialog-actions {
+  padding: var(--space-md) var(--space-lg);
+  justify-content: space-between;
+  display: flex;
+  gap: var(--space-md);
+  border-top: 1px solid var(--border-light);
+  background: var(--bg-white);
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  z-index: 10;
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.dialog-actions button {
+  min-width: 120px;
+}
+
+/* Enhanced player selection */
+.player {
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xs);
+}
+
+.player.selected {
+  background-color: var(--bg-selected);
+  box-shadow: var(--shadow-md);
+  border-left: 3px solid var(--border-highlight);
+  transform: translateX(3px);
+}
+
+.player:hover:not(.selected) {
+  background-color: var(--bg-light);
+}
+
+/* No cards state improvements */
+.no-cards {
+  text-align: center;
+  padding: var(--space-lg);
+  background-color: var(--bg-info);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.pass-turn {
+  margin-top: var(--space-md);
+}
+
+.teammate-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: center;
+  margin-top: var(--space-md);
+}
+
+/* ==================== MEDIA QUERIES ==================== */
+@media (max-width: 768px) {
+  .room-header {
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+  }
+  
+  .room-header div:first-child {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .room-header h2 {
+    margin: var(--space-xs) 0;
+  }
+  
+  .room-header div:last-child {
+    width: 100%;
+  }
+  
+  .room-header .leave-btn {
+    width: 100%;
+  }
+}
+
+
+@media (max-width: 1000px) {
+  .teams-container {
+    flex-direction: column;
+  }
+  
+  .teams-panel {
+    grid-template-columns: 1fr;
+  }
+  
+  .game-rules {
+    grid-template-columns: 1fr;
+  }
+  
+  .sets-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .card {
+    width: 80px;
+    height: 112px;
+  }
+  
+  .cards-selection-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .set-divider {
+    grid-column: 1 / span 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .game-status {
+    flex-direction: column;
+    gap: var(--space-sm);
+    align-items: flex-start;
+  }
+  
+  .teams-panel {
+    grid-template-columns: 1fr;
+  }
+  
+  .your-hand {
+    padding: var(--space-sm);
+  }
+  
+  .cards-container {
+    justify-content: space-around;
+    gap: 8px;
+  }
+  
+  .card {
+    width: 70px;
+    height: 98px;
+  }
+  
+  .card .suit {
+    font-size: 1.5em;
+  }
+  
+  .card .rank {
+    font-size: 1.1em;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .cards-selection-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .set-divider {
+    grid-column: 1 / span 2;
+  }
 }

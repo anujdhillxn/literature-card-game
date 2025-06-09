@@ -1,10 +1,10 @@
 // src/components/Room/GameOver.tsx
 import React from 'react';
-import { type RoomState } from '../../../types';
+import { type LiteratureRoomState } from '../../../types';
 import { SET_NAMES } from '../../../utils/cardHelpers';
 
 interface PostGameProps {
-    roomState: RoomState;
+    roomState: LiteratureRoomState;
     onLeaveRoom: () => void;
 }
 

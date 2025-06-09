@@ -24,7 +24,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
             await self.update_room()
         except ValueError as e:
             print(f"Error joining room: {e}")
-            await self.update_self(str(e))
+            await self.update_self(str(e), True)
             await self.close()
 
     async def disconnect(self, close_code):
@@ -39,7 +39,6 @@ class RoomConsumer(AsyncWebsocketConsumer):
             await self.update_room()
         except ValueError as e:
             print(f"Error during disconnect: {e}")
-            pass
 
     async def receive(self, text_data):
         try:
@@ -72,11 +71,12 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-    async def update_self(self, error):
+    async def update_self(self, error, disconnect=False):
         """Send an update to the user about their action."""
         await self.send(text_data=json.dumps(
             {
                 "success": False,
                 "error": error,
+                "disconnect": disconnect
             }
         ))

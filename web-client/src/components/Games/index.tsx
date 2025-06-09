@@ -6,6 +6,7 @@ export interface GameProps {
     roomState: RoomState;
     roomActions: RoomActions;
 }
+
 const Game = (props: GameProps): JSX.Element => {
     const gameType = props.roomState.type;
     switch (gameType) {

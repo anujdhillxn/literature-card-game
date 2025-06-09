@@ -33,8 +33,11 @@ const Room: React.FC<RoomProps> = ({ roomId, userToken, username, onLeaveRoom })
         }
         else {
             setErrorMessage(data.error);
+            if (data.disconnect) {
+                onLeaveRoom();
+            }
         }
-    }, []);
+    }, [onLeaveRoom]);
 
     const { status, error, sendMessage, closeConnection } = useWebSocket(
         roomId,
@@ -104,13 +107,18 @@ const Room: React.FC<RoomProps> = ({ roomId, userToken, username, onLeaveRoom })
     };
 
     if (status === 'connecting' || !roomState) {
-        return <><div className="loading">Connecting to room {roomId}...</div>        <div><button onClick={onLeaveRoom} className="leave-btn">Leave Room</button></div></>;
+
+        return <>
+            {errorMessage && <ErrorMessage message={displayError} />}<div className="loading">Connecting to room {roomId}...</div>        <div><button onClick={onLeaveRoom} className="leave-btn">Leave Room</button></div></>;
     }
     return <div className='room'>
         {errorMessage && <ErrorMessage message={displayError} />}
-        <div>Connection Status: {status}</div>
-        <h2>Room: {roomId}</h2>
-        <div><button onClick={onLeaveRoom} className="leave-btn">Leave Room</button></div>
+        <div className="room-header">
+            <div>{status == 'open' ? 'Connected' : 'Disconnected'}</div>
+            <span>Room: {roomId}</span>
+            <div><button onClick={onLeaveRoom} className="leave-btn">Leave Room</button></div>
+        </div>
+
         <Game roomActions={roomActions} roomState={roomState} />
     </div>
 };

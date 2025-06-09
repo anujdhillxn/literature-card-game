@@ -1,6 +1,6 @@
 // src/components/Room/GameBoard.tsx
 import React, { useState } from 'react';
-import { type AskCardMove, type Card as CardType, type ClaimSetMove, type InGameAction, type PassTurnMove, type RoomState } from '../../../types';
+import { type AskCardMove, type Card as CardType, type ClaimSetMove, type LiteratureInGameAction, type LiteratureRoomState, type PassTurnMove } from '../../../types';
 import PlayerList from './PlayerList';
 import SetGrid from './SetGrid';
 import Card from './Card';
@@ -8,9 +8,9 @@ import LastAsk from './LastAsk';
 import { ALL_CARDS, getPlayerName, getPlayerTeam, SET_NAMES } from '../../../utils/cardHelpers';
 
 interface InGameProps {
-    roomState: RoomState;
+    roomState: LiteratureRoomState;
     onLeaveRoom: () => void;
-    onGameAction: (action: InGameAction) => void;
+    onGameAction: (action: LiteratureInGameAction) => void;
 }
 
 const InGame: React.FC<InGameProps> = ({
@@ -61,7 +61,6 @@ const InGame: React.FC<InGameProps> = ({
     };
     const currentPlayer = roomState.game.players.find(p => p.id === userId);
     const isMyTurn = currentPlayer?.id === roomState.game.currentPlayerId;
-    console.log(roomState);
     return (
         <div className="game-active">
             <div className="game-status">

@@ -1,4 +1,3 @@
-inheritance refactor
 better error and game log handling in ui
 -----------------
 authentication

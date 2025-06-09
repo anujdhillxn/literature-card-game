@@ -2,9 +2,13 @@ import { type JSX } from 'react';
 import PreGame from './PreGame';
 import PostGame from './PostGame';
 import InGame from './InGame';
-import type { GameProps } from '..';
+import type { LiteratureRoomState, RoomActions } from '../../../types';
+interface LiteratureProps {
+    roomState: LiteratureRoomState;
+    roomActions: RoomActions;
+}
 
-const Game = (props: GameProps): JSX.Element => {
+const Game = (props: LiteratureProps): JSX.Element => {
     const userId = props.roomState.receiverId;
     const gameStarted = props.roomState.game.state === 'in_progress';
     const gameEnded = props.roomState.game.state === 'ended';

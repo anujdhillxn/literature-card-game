@@ -1,10 +1,10 @@
 // src/components/Room/PlayerList.tsx
 import React from 'react';
-import { type Player, type RoomState } from '../../../types';
+import { type LiteraturePlayer, type RoomState } from '../../../types';
 
 interface PlayerListProps {
     team: 1 | 2;
-    players: Player[];
+    players: LiteraturePlayer[];
     userId: string;
     currentPlayerId: string | null;
     selectedPlayerId: string | null;

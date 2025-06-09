@@ -32,16 +32,18 @@ class Game:
     
     def add_player(self, player_id, player_name, player_token):
         """
-        Create a new player instance.
+        Create a new player instance and add them to the game.
         
         Args:
             player_id: Unique identifier for the player
             player_name: Name of the player
-            player_token: Unique token for the player
-            team: Team number (1 or 2)
+            player_token: Authentication token for the player
             
         Returns:
-            Player: The created player object
+            LiteraturePlayer: The created player object
+            
+        Raises:
+            ValueError: If the game already has the maximum number of players
         """
         team = 1 if len(self.players) % 2 == 0 else 2
         if len(self.players) >= 6:
@@ -57,8 +59,8 @@ class Game:
         Args:
             player_id: Unique identifier for the player
             
-        Raises:
-            ValueError: If the player does not exist
+        Note:
+            If the removed player was the current player, the current turn is reset
         """
         if player_id in self.players:
             del self.players[player_id]
@@ -73,7 +75,10 @@ class Game:
             player_id: Player's unique identifier
             
         Returns:
-            Player: The player object or None if not found
+            LiteraturePlayer: The player object
+            
+        Raises:
+            ValueError: If player with given ID is not found
         """
         if player_id in self.players:
             return self.players[player_id]
@@ -87,7 +92,7 @@ class Game:
             token: Player's unique token
             
         Returns:
-            Player: The player object or None if not found
+            LiteraturePlayer: The player object or None if not found
         """
         for player in self.players.values():
             if player.token == token:
@@ -102,19 +107,17 @@ class Game:
             team (int): Team number (1 or 2)
             
         Returns:
-            list: List of Player objects in the team
+            list: List of LiteraturePlayer objects in the team
         """
         return [player for player in self.players.values() if player.team == team]
     
     def start_game(self):
         """
-        Start the game with the provided players and a randomly selected starting player.
+        Start the game by selecting a random starting player and dealing cards.
+        
         Raises:
             ValueError: If there are not exactly 3 players on each team
-                      or if the game has already started
-        
-        Returns:
-            str: ID of the starting player
+                      or if the game has already started/ended
         """
         if self.state != NOT_STARTED:
             raise ValueError("Game has already started or ended")
@@ -138,7 +141,7 @@ class Game:
         """
         Deal cards to all players at the start of the game.
         
-        Each player receives 9 cards from a shuffled deck.
+        Each player receives 9 cards from a shuffled deck of 54 cards.
         """
         deck = list(ALL_CARDS)
         random.shuffle(deck)
@@ -149,7 +152,9 @@ class Game:
     
     def end_game(self):
         """
-        End the game and determine the winner.
+        End the game and determine the winner based on team scores.
+        
+        The team with more claimed sets wins. If tied, winning_team is set to None.
         """
         self.state = ENDED
         
@@ -166,7 +171,7 @@ class Game:
         Get the player whose turn it currently is.
         
         Returns:
-            Player: The current player or None if game not started
+            LiteraturePlayer: The current player or None if game not started
         """
         if self.current_turn_player_id is not None:
             return self.get_player(self.current_turn_player_id)
@@ -180,7 +185,7 @@ class Game:
             team (int): Team number (1 or 2)
         
         Returns:
-            set: Set of cards held by the team
+            set: Set of cards held by all members of the team
         """
         cards = set()
         for player in self.get_team_players(team):
@@ -197,7 +202,13 @@ class Game:
             card (str): The card being requested
         
         Raises:
-            ValueError: If it's not the asking player's turn or other validation fails
+            ValueError: If the request is invalid (player already has card,
+                      set already claimed, player doesn't have a card from same set,
+                      players are on same team, or asked player has no cards)
+                      
+        Note:
+            If the ask is successful, the card is transferred and turn remains with asker.
+            If unsuccessful, turn passes to the asked player.
         """
         if card not in ALL_CARDS:
             raise ValueError("Invalid card requested.")
@@ -240,15 +251,19 @@ class Game:
     
     def claim_set(self, set_number, declaring_player_id):
         """
-        Record that a team has successfully claimed a set.
+        Process a player's claim for a complete set of cards.
         
         Args:
             set_number (int): Number of the set being claimed (1-9)
-            team (int): Team number (1 or 2) claiming the set
-            declaring_player_id: ID of the player who made the declaration
+            declaring_player_id: ID of the player making the declaration
             
         Raises:
-            ValueError: If set number or team is invalid or game is not active
+            ValueError: If set number is invalid, set already claimed, or player ID invalid
+            
+        Note:
+            If the claiming team has all cards in the set, they get the point.
+            Otherwise, the opposing team gets the point.
+            All cards from the claimed set are removed from all players' hands.
         """
             
         if set_number < 1 or set_number > 9:
@@ -280,12 +295,15 @@ class Game:
     
     def pass_turn_to_teammate(self, passer_id, teammate_id):
         """        
-        Pass the turn to a teammate.
+        Pass the turn to a teammate when current player has no cards.
+        
         Args:
             passer_id: ID of the player passing the turn
             teammate_id: ID of the teammate to pass the turn to
+            
         Raises:
-            ValueError: If the game is not in progress, or if the players are not teammates
+            ValueError: If the players are not teammates, passer still has cards,
+                      or attempting to pass to self
         """
         passer_player = self.get_player(passer_id)
         teammate_player = self.get_player(teammate_id)
@@ -302,6 +320,17 @@ class Game:
         self.current_turn_player_id = teammate_id
     
     def register_pre_game_action(self, actor_id, is_actor_host, action):
+        """
+        Process pre-game actions like team changes.
+        
+        Args:
+            actor_id: ID of the player performing the action
+            is_actor_host: Boolean indicating if actor is the host
+            action: Dictionary containing the action details
+            
+        Raises:
+            ValueError: If game already started or action type unknown
+        """
         if self.state != NOT_STARTED:
             raise ValueError("Game has already started or ended")
         action_type = action.get('type')
@@ -318,6 +347,16 @@ class Game:
             raise ValueError(f"Unknown pre-game action type: {action_type}")
     
     def register_in_game_action(self, actor_id, action):
+        """
+        Process in-game actions like asking for cards, claiming sets, or passing turns.
+        
+        Args:
+            actor_id: ID of the player performing the action
+            action: Dictionary containing the action details
+            
+        Raises:
+            ValueError: If game not in progress, not actor's turn, or invalid action
+        """
         if self.state != IN_PROGRESS:
             raise ValueError("Game is not active")
         action_type = action.get('type')
@@ -344,13 +383,14 @@ class Game:
     
     def to_dict(self, asker_id):
         """
-        Return a dictionary representation of the game.
+        Return a dictionary representation of the game suitable for serialization.
         
         Args:
             asker_id: ID of the player requesting the game state
         
         Returns:
-            dict: Game data for serialization
+            dict: Game data with player information, current state, and scores
+                 Only includes the requesting player's cards for security
         """
         players_data = []
         for player in self.players.values():

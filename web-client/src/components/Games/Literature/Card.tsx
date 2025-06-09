@@ -17,7 +17,7 @@ const Card = ({
     displayOnly = false,
     onSelect
 }: CardProps): React.JSX.Element => {
-    const rank = card[0];
+    let rank = card[0];
     const suit = card[1];
 
     let suitSymbol = "";
@@ -41,9 +41,15 @@ const Card = ({
             color = "black";
             break;
         case "R":
-            return <span className="card joker red">JOKER</span>;
+            suitSymbol = "★";
+            color = "red";
+            rank = "Joker"; // Joker
+            break;
         case "B":
-            return <span className="card joker black">JOKER</span>;
+            suitSymbol = "★";
+            color = "black";
+            rank = "Joker"; // Joker
+            break;
     }
 
     let displayRank = rank;
