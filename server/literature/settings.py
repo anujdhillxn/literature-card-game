@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'social_django',
     'corsheaders',
     "channels",
-    #'users',
     'games',
 ]
 

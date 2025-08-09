@@ -19,6 +19,14 @@ const SetGrid: React.FC<SetGridProps> = ({
 }) => {
     return (
         <div className="claimed-sets">
+            {selectedSet && (
+                <button
+                    className="claim-btn"
+                    onClick={onClaimSet}
+                >
+                    Claim Set {selectedSet}
+                </button>
+            )}
             <h3>Sets</h3>
             <div className="sets-grid">
                 {SET_NAMES.map((name, index) => {
@@ -40,15 +48,6 @@ const SetGrid: React.FC<SetGridProps> = ({
                     );
                 })}
             </div>
-
-            {canClaimSets && selectedSet && (
-                <button
-                    className="claim-btn"
-                    onClick={onClaimSet}
-                >
-                    Claim Set {selectedSet}
-                </button>
-            )}
         </div>
     );
 };
